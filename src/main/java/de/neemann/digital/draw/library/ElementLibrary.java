@@ -16,6 +16,8 @@ import de.neemann.digital.core.extern.ExternalFile;
 import de.neemann.digital.core.flipflops.*;
 import de.neemann.digital.core.io.*;
 import de.neemann.digital.core.io.telnet.Telnet;
+import de.neemann.digital.core.io.zenoh.ZenohPublisher;
+import de.neemann.digital.core.io.zenoh.ZenohSubscriber;
 import de.neemann.digital.core.memory.*;
 import de.neemann.digital.core.pld.DiodeBackward;
 import de.neemann.digital.core.pld.DiodeForward;
@@ -154,6 +156,8 @@ public class ElementLibrary implements Iterable<ElementLibrary.ElementContainer>
                                 .add(Telnet.DESCRIPTION)
                                 .add(VGA.DESCRIPTION)
                                 .add(MIDI.DESCRIPTION)
+                                .add(ZenohPublisher.DESCRIPTION)
+                                .add(ZenohSubscriber.DESCRIPTION)
                         )
                 )
                 .add(new LibraryNode(Lang.get("lib_wires"))
