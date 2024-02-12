@@ -265,3 +265,8 @@ Many thanks to the following persons for their help:
 ## Additional Screenshots
 
 ![screnshot3](distribution/screenshot3.png)
+
+## Test build without running tests or checking style
+```bash
+mvn -Dmaven.test.skip=true -Dcheckstyle.skip=true package
+```

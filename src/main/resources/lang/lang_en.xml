@@ -932,6 +932,13 @@
     <string name="elem_TransGate_pin_S">control input.</string>
     <string name="elem_TransGate_pin_~S">inverted control input</string>
 
+    <string name="elem_ZenohPubliser">Z Pub</string>
+    <string name="elem_ZenohPubliser_tt">Whenever data on `in` is changed, the new value will be published to the configured topic name. The topic will also be queryable.</string>
+    <string name="elem_ZenohPubliser_pin_in">The data which is published on change.</string>
+
+    <string name="elem_ZenohSubscriber">Z Sub</string>
+    <string name="elem_ZenohSubscriber_tt">Whenever data on the configured topic name is received, the new value will be output on `out`.</string>
+    <string name="elem_ZenohSubscriber_pin_out">The data last received.</string>
 
     <!-- Misc -->
 
@@ -1995,6 +2002,8 @@
     <string name="menu_addPowerSupply_tt">Adds a power supply to the circuit.</string>
     <string name="menu_exportVHDL">Export to VHDL</string>
     <string name="menu_exportVHDL_tt">Exports the circuit to VHDL</string>
+    <string name="menu_exportJSON">Export to JSON</string>
+    <string name="menu_exportJSON_tt">Exports the circuit to JSON</string>
     <string name="menu_exportVerilog">Export to Verilog</string>
     <string name="menu_exportVerilog_tt">Exports the circuit to Verilog</string>
     <string name="menu_pdfDocumentation">Documentation</string>

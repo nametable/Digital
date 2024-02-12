@@ -1028,4 +1028,11 @@ public final class Keys {
      */
     public static final Key<Boolean> SKIP_HDL =
             new Key<>("skipHDL", false).setSecondary();
+
+
+    /**
+     * The Zenoh key expression
+     */
+    public static final Key<String> ZENOH_KEYEXPR =
+            new Key<>("zenohKeyExpr", "");
 }
