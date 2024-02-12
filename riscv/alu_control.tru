@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<truthTable>
+  <variables>
+    <variable name="ALUOp1"/>
+    <variable name="ALUOp2"/>
+    <variable name="funct3-2"/>
+    <variable name="funct3-1"/>
+    <variable name="funct3-0"/>
+    <variable name="ins30"/>
+  </variables>
+  <results>
+    <result>
+      <name>Op3</name>
+      <values class="BoolTable">0000000000000000XXXXXXXXXXXXXXXX0000111111001100XXXXXXXXXXXXXXXX</values>
+    </result>
+    <result>
+      <name>Op2</name>
+      <values class="BoolTable">0000000000000000XXXXXXXXXXXXXXXX0011111100000010XXXXXXXXXXXXXXXX</values>
+    </result>
+    <result>
+      <name>Op1</name>
+      <values class="BoolTable">0000000000000000XXXXXXXXXXXXXXXX0000000011110011XXXXXXXXXXXXXXXX</values>
+    </result>
+    <result>
+      <name>Op0</name>
+      <values class="BoolTable">0000000000000000XXXXXXXXXXXXXXXX0100001100100000XXXXXXXXXXXXXXXX</values>
+    </result>
+  </results>
+</truthTable>
