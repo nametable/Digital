@@ -32,17 +32,17 @@ public class Register extends Node implements Element, Countable, ProgramCounter
             .addAttribute(Keys.VALUE_IS_PROBE)
             .supportsHDL();
 
-    private final int bits;
+    protected final int bits;
     private final boolean isProbe;
-    private final String label;
+    protected final String label;
     private final boolean isProgramCounter;
-    private final ObservableValue q;
-    private ObservableValue dVal;
-    private ObservableValue clockVal;
-    private ObservableValue enableVal;
+    protected final ObservableValue q;
+    protected ObservableValue dVal;
+    protected ObservableValue clockVal;
+    protected ObservableValue enableVal;
     private boolean lastClock;
-    private long value;
-    private boolean enable;
+    protected long value;
+    protected boolean enable;
 
     /**
      * Creates a new instance

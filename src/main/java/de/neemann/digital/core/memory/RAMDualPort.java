@@ -36,19 +36,19 @@ public class RAMDualPort extends Node implements Element, RAMInterface {
             .addAttribute(Keys.LABEL)
             .supportsHDL();
 
-    private DataField memory;
+    protected DataField memory;
     private final ValueFormatter formatter;
-    private final ObservableValue output;
-    private final int addrBits;
-    private final int bits;
+    protected final ObservableValue output;
+    protected final int addrBits;
+    protected final int bits;
     private final String label;
-    private final int size;
+    protected final int size;
     private final boolean isProgramMemory;
-    private ObservableValue addrIn;
-    private ObservableValue dataIn;
-    private ObservableValue strIn;
-    private ObservableValue clkIn;
-    private ObservableValue ldIn;
+    protected ObservableValue addrIn;
+    protected ObservableValue dataIn;
+    protected ObservableValue strIn;
+    protected ObservableValue clkIn;
+    protected ObservableValue ldIn;
     private int addr;
     private boolean lastClk = false;
     private boolean ld;
@@ -172,9 +172,13 @@ public class RAMDualPort extends Node implements Element, RAMInterface {
             addr = (int) addrIn.getValue();
 
         if (str)
-            memory.setData(addr, data);
+            writeToMemory(addr, data);
 
         lastClk = clk;
+    }
+
+    protected void writeToMemory(int addr, long data) {
+        memory.setData(addr, data);
     }
 
     @Override
