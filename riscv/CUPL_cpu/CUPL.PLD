@@ -1,0 +1,20 @@
+Name     cpu.dig ;
+PartNo   00 ;
+Date     25.01.2024 ;
+Revision 01 ;
+Designer logan ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g22v10 ;
+
+ar = 'b'0 ;
+sp = 'b'0 ;
+
+/* inputs */
+
+/* outputs */
+PIN 14 = Y;
+
+/* combinatorial logic */
+Y = 'b'0;

@@ -13,4 +13,14 @@ start:
 
     li x10, -1 # x10 should be 0xffffffff
 
-    j start
+    # j start # jal with rd=x0
+    jal x12, next # jal with rd=x12
+
+    li x13, 0x12345678
+    beq x0, x0, end # branch to end
+
+next:
+    jalr x0, x12, 0 # go back where we came from
+
+end:
+    j start # loop forever
