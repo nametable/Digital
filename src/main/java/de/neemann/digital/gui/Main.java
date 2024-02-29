@@ -59,6 +59,12 @@ import de.neemann.digital.toolchain.Configuration;
 import de.neemann.digital.undo.ChangedListener;
 import de.neemann.digital.undo.Modifications;
 import de.neemann.gui.*;
+import io.zenoh.Session;
+import io.zenoh.exceptions.KeyExprException;
+import io.zenoh.exceptions.SessionException;
+import io.zenoh.keyexpr.KeyExpr;
+
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -668,6 +674,7 @@ public final class Main extends JFrame implements ClosingWindowListener.ConfirmS
 
         export.add(createVHDLExportAction().createJMenuItem());
         export.add(createVerilogExportAction().createJMenuItem());
+        export.add(createJSONExportAction().createJMenuItem());
 
         export.addSeparator();
         export.add(new ExportZipAction(this).createJMenuItem());
@@ -724,6 +731,60 @@ public final class Main extends JFrame implements ClosingWindowListener.ConfirmS
                 );
             }
         }.setToolTip(Lang.get("menu_exportVHDL_tt"));
+    }
+
+    private ToolTipAction createJSONExportAction() {
+        return new ToolTipAction(Lang.get("menu_exportJSON")) {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                JFileChooser fc = new MyFileChooser();
+                if (filename != null)
+                    fc.setSelectedFile(SaveAsHelper.checkSuffix(filename, "json"));
+
+                ElementAttributes settings = Settings.getInstance().getAttributes();
+                File exportDir = settings.getFile("exportDirectory");
+                if (exportDir != null)
+                    fc.setCurrentDirectory(exportDir);
+
+                fc.addChoosableFileFilter(new FileNameExtensionFilter("JSON", "json"));
+                new SaveAsHelper(Main.this, fc, "json").checkOverwrite(
+                        file -> {
+                            settings.setFile("exportDirectory", file.getParentFile());
+                            try {
+                                // print test message
+                                System.out.println("Exporting to JSON: " + file.getAbsolutePath());
+
+                                // set os.arch
+                                System.setProperty("os.arch", "x86_64");
+
+                                JSONObject json = new JSONObject();
+                                Session session = Session.open();
+                                session.put(KeyExpr.tryFrom("host/digital/hey"), "Yo, I sent this from Java!").res();
+                                Circuit circuit = circuitComponent.getCircuit();
+                                circuit.getElements().forEach(element -> {
+                                    JSONObject elementJSON = new JSONObject();
+                                    
+                                });
+
+                                json.put("test", "test");
+                                System.out.println(json.toString());
+                            
+
+                                // throw new IOException();
+                                // circuitComponent.getCircuit().writeToFile(file);
+                            } catch (Exception e) {
+                                new ErrorMessage(Lang.get("msg_errorWritingFile")).addCause(e).show(Main.this);
+                            // } catch (SessionException e) {
+                            //     // TODO Auto-generated catch block
+                            //     e.printStackTrace();
+                            // } catch (KeyExprException e) {
+                            //     // TODO Auto-generated catch block
+                            //     e.printStackTrace();
+                            }
+                        }
+                );
+            }
+        }.setToolTip(Lang.get("menu_exportJSON_tt"));
     }
 
     private ToolTipAction createVerilogExportAction() {
@@ -1453,6 +1514,8 @@ public final class Main extends JFrame implements ClosingWindowListener.ConfirmS
 
     private void clearModelDescription() {
         if (model != null)
+            // cleanup model (release resources)
+            model.cleanup();
             model.close();
 
         modelCreator = null;

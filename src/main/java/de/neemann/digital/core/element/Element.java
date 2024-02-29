@@ -62,4 +62,14 @@ public interface Element {
      */
     default void enableCircuitModification(VisualElement visualElement, CircuitModifier circuitModifier) {
     }
+
+    /**
+     * Is called when the simulation is stopped.
+     * This method is used to clean up the element and
+     * any resources allocated for it.
+     *
+     * @param model the model this element belongs to
+     */
+    default void cleanup(Model model) {
+    }
 }

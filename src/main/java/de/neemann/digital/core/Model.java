@@ -243,6 +243,17 @@ public class Model implements Iterable<Node>, SyncAccess {
     }
 
     /**
+     * Cleans up the model.
+     * Runs cleanup on all elements. This allows for closing of open files and sockets.
+     */
+    public synchronized void cleanup() {
+        for (Node n : nodes)
+            if (n instanceof de.neemann.digital.core.element.Element) {
+                ((de.neemann.digital.core.element.Element)n).cleanup(this);
+            }
+    }
+
+    /**
      * Called if a error has occurred during model execution.
      * Also closes the model.
      *

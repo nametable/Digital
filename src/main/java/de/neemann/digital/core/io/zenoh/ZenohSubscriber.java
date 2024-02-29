@@ -79,11 +79,13 @@ public class ZenohSubscriber extends Node implements Element {
     }
 
     public void onSample(Sample sample) {
-        System.out.println("Received sample: " + sample);
-        String testString = new String();
+        byte[] payload = sample.getValue().getPayload();
+        
+        System.out.println("Received sample: " + payload);
+        ByteBuffer buffer = ByteBuffer.wrap(payload);
 
-        // parse int from string
-        int testInt = Integer.parseInt(sample.getValue().toString());
+        // todo: handle error when buffer is not big enough
+        long testInt = buffer.getLong();
 
         model.modify(() -> dataOut.setValue(testInt));
     }
@@ -99,15 +101,17 @@ public class ZenohSubscriber extends Node implements Element {
                     .with(sample -> this.onSample(sample)).res();
             subscriber.getReceiver();
 
-        } catch (KeyExprException e) {
+            session.get(KeyExpr.tryFrom(this.zenohKeyExpr)).res();
+        } catch (ZenohException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
 
-        catch (ZenohException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    @Override
+    public void cleanup(Model model) {
+        System.out.println("Cleaning up ZenohSubscriber");
+        subscriber.close();
     }
 
 }
