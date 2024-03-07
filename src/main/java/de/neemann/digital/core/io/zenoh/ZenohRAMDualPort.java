@@ -112,6 +112,10 @@ public class ZenohRAMDualPort extends RAMDualPort {
 
     @Override
     protected void writeToMemory(int addr, long data) {
+        long prevData = memory.getData()[addr];
+        if (prevData == data) {
+            return;
+        }
         super.writeToMemory(addr, data);
 
         MemoryRangeMessage message = new MemoryRangeMessage(bytesPerWord, addr, new long[] { data });
