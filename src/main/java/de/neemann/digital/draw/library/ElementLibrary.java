@@ -17,6 +17,7 @@ import de.neemann.digital.core.flipflops.*;
 import de.neemann.digital.core.io.*;
 import de.neemann.digital.core.io.telnet.Telnet;
 import de.neemann.digital.core.io.zenoh.ZenohPublisher;
+import de.neemann.digital.core.io.zenoh.ZenohRAMDualAccess;
 import de.neemann.digital.core.io.zenoh.ZenohRAMDualPort;
 import de.neemann.digital.core.io.zenoh.ZenohRegister;
 import de.neemann.digital.core.io.zenoh.ZenohSubscriber;
@@ -200,6 +201,7 @@ public class ElementLibrary implements Iterable<ElementLibrary.ElementContainer>
                                 .add(RAMAsync.DESCRIPTION)
                                 .add(GraphicCard.DESCRIPTION))
                                 .add(ZenohRAMDualPort.DESCRIPTION)
+                                .add(ZenohRAMDualAccess.DESCRIPTION)
                         .add(new LibraryNode(Lang.get("lib_eeprom"))
                                 .add(EEPROM.DESCRIPTION)
                                 .add(EEPROMDualPort.DESCRIPTION))

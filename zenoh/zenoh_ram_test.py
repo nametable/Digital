@@ -5,7 +5,7 @@ import time
 import sys
 
 
-base_ram_key = "test_ram"
+base_ram_key = "ram"
 # base_ram_key = "pub_test"
 counter = 0
 
@@ -17,7 +17,7 @@ def change_listener(sample: Sample):
 
 session: Session = zenoh.open()
 # session.declare_subscriber(f'{base_ram_key}/changes', change_listener)
-subscriber: Subscriber = session.declare_subscriber('**', change_listener)
+subscriber: Subscriber = session.declare_subscriber(f'{base_ram_key}/**', change_listener)
 
 # print("Enter 'q' to quit...")
 # c = '\0'
@@ -60,7 +60,8 @@ while True:
     elif command_args[0] == "info":
         session.get(f'{base_ram_key}/info', info_response)
 
-    elif command_args[0] == "set":
+    elif command_args[0] == "set": # set <addr> <bytes_per_word> <data>
+        # ex set 0 1 01
         addr = int(command_args[1])
         bytes_per_word = int(command_args[2])
 

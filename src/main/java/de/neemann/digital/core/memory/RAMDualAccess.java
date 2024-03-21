@@ -36,20 +36,20 @@ public class RAMDualAccess extends Node implements Element, RAMInterface {
             .addAttribute(Keys.LABEL)
             .supportsHDL();
 
-    private final DataField memory;
-    private final ObservableValue out1;
-    private final ObservableValue out2;
+    protected final DataField memory;
+    protected final ObservableValue out1;
+    protected final ObservableValue out2;
     private final int addrBits;
-    private final int bits;
+    protected final int bits;
     private final String label;
-    private final int size;
+    protected final int size;
     private final boolean isProgramMemory;
-    private ObservableValue addr1In;
-    private ObservableValue data1In;
-    private ObservableValue str1In;
-    private ObservableValue clk1In;
-    private ObservableValue ld1In;
-    private ObservableValue addr2In;
+    protected ObservableValue addr1In;
+    protected ObservableValue data1In;
+    protected ObservableValue str1In;
+    protected ObservableValue clk1In;
+    protected ObservableValue ld1In;
+    protected ObservableValue addr2In;
     private int addr1;
     private int addr2;
     private boolean lastClk = false;
@@ -106,11 +106,15 @@ public class RAMDualAccess extends Node implements Element, RAMInterface {
             addr1 = (int) addr1In.getValue();
 
         if (str)
-            memory.setData(addr1, data);
+            writeToMemory(addr1, data);
 
         addr2 = (int) addr2In.getValue();
 
         lastClk = clk;
+    }
+
+    protected void writeToMemory(int addr, long data) {
+        memory.setData(addr, data);
     }
 
     @Override
