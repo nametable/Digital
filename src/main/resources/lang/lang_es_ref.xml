@@ -2146,6 +2146,8 @@ However, they must not be used above the header line listing the signal names.&l
     <string name="key_colorScheme_CUSTOM">User Defined</string>
     <string name="menu_colorSchemePreset">Preset</string>
     <string name="key_customColorScheme">User Defined Colors</string>
+    <string name="key_zenohKeyExpr">Zenoh Key Expression</string>
+    
     <string name="colorName_BACKGROUND">Background</string>
     <string name="colorName_MAIN">Foreground</string>
     <string name="colorName_WIRE">Wire</string>
