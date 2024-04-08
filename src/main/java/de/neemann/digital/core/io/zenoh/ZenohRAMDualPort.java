@@ -93,7 +93,7 @@ public class ZenohRAMDualPort extends RAMDualPort {
         }
 
         try {
-            query.reply(query.getKeyExpr()).success(new io.zenoh.value.Value(replyMessage.toByteBuffer().array(), new Encoding(KnownEncoding.APP_CUSTOM))).res();
+            query.reply(query.getKeyExpr()).success(new io.zenoh.value.Value(replyMessage.toByteBuffer().array(), new Encoding(KnownEncoding.APP_OCTET_STREAM))).res();
         } catch (ZenohException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -122,7 +122,7 @@ public class ZenohRAMDualPort extends RAMDualPort {
 
         System.out.println("writeToMemory called!");
         try {
-            changePublisher.put(new io.zenoh.value.Value(message.toByteBuffer().array(), new Encoding(KnownEncoding.APP_CUSTOM))).res();
+            changePublisher.put(new io.zenoh.value.Value(message.toByteBuffer().array(), new Encoding(KnownEncoding.APP_OCTET_STREAM))).res();
         } catch (ZenohException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -146,7 +146,7 @@ public class ZenohRAMDualPort extends RAMDualPort {
                     ByteBuffer buffer = ByteBuffer.allocate(8);
                     buffer.putInt(this.size);
                     buffer.putInt(this.bits);
-                    query.reply(query.getKeyExpr()).success(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_CUSTOM))).res();
+                    query.reply(query.getKeyExpr()).success(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM))).res();
                 } catch (ZenohException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();

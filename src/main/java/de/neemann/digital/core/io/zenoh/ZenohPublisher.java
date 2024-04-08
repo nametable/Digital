@@ -68,7 +68,7 @@ public class ZenohPublisher extends Node implements Element {
         ByteBuffer buffer = ByteBuffer.allocate(8);
         buffer.putLong(value);
         try {
-            publisher.put(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_INTEGER))).res();
+            publisher.put(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM))).res();
         } catch (ZenohException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -96,7 +96,7 @@ public class ZenohPublisher extends Node implements Element {
                     long value = dataIn.getValue();
                     ByteBuffer buffer = ByteBuffer.allocate(8);
                     buffer.putLong(value);
-                    query.reply(KeyExpr.tryFrom(this.zenohKeyExpr)).success(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_INTEGER))).res();
+                    query.reply(KeyExpr.tryFrom(this.zenohKeyExpr)).success(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM))).res();
                 } catch (ZenohException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
