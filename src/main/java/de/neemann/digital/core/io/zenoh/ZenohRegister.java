@@ -59,7 +59,7 @@ public class ZenohRegister extends Register {
             try {
                 ByteBuffer buffer = ByteBuffer.allocate(8);
                 buffer.putLong(this.value);
-                changePublisher.put(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_INTEGER))).res();
+                changePublisher.put(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM))).res();
             } catch (ZenohException e) {
                 e.printStackTrace();
             }
@@ -88,7 +88,7 @@ public class ZenohRegister extends Register {
                     ByteBuffer buffer = ByteBuffer.allocate(8);
                     buffer.putLong(this.value);
                     query.reply(query.getKeyExpr())
-                            .success(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_INTEGER)))
+                            .success(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM)))
                             .res();
                 } catch (ZenohException e) {
                     // TODO Auto-generated catch block
@@ -105,7 +105,7 @@ public class ZenohRegister extends Register {
                     buffer.putInt(labelBytes.length);
                     buffer.put(labelBytes);
                     query.reply(query.getKeyExpr())
-                            .success(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_CUSTOM)))
+                            .success(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM)))
                             .res();
                 } catch (ZenohException e) {
                     // TODO Auto-generated catch block

@@ -81,13 +81,13 @@ public class ZenohSubscriber extends Node implements Element {
     public void onSample(Sample sample) {
         byte[] payload = sample.getValue().getPayload();
         
-        System.out.println("Received sample: " + payload);
         ByteBuffer buffer = ByteBuffer.wrap(payload);
+        
+        // TODO: handle error when buffer is not big enough
+        long value = buffer.getLong();
+        System.out.println("Subscriber: " + sample.getKeyExpr().toString() + ": hex " + Long.toHexString(value) + " dec " + value);
 
-        // todo: handle error when buffer is not big enough
-        long testInt = buffer.getLong();
-
-        model.modify(() -> dataOut.setValue(testInt));
+        model.modify(() -> dataOut.setValue(value));
     }
 
     @Override
