@@ -28,21 +28,29 @@ import static de.neemann.digital.core.element.PinInfo.input;
 /**
  * The telnet node
  */
-public class ZenohPublisher extends Node implements Element {
+public class ZenohPublisher extends Node implements Element, ZenohDataSender {
 
     /**
-     * The telnet server description
+     * The ZenohPublisher description
      */
     public static final ElementTypeDescription DESCRIPTION = new ElementTypeDescription(ZenohPublisher.class,
             input("in"))
             .addAttribute(Keys.BITS)
             .addAttribute(Keys.ROTATE)
             .addAttribute(Keys.LABEL)
-            .addAttribute(Keys.ZENOH_KEYEXPR);
+            .addAttribute(Keys.ZENOH_KEYEXPR)
+            .addAttribute(Keys.ZENOH_ENABLE_PUBLISHING)
+            .addAttribute(Keys.ZENOH_ENABLE_QUERYING)
+            .addAttribute(Keys.ZENOH_ENABLE_RATE_LIMIT);
 
     private ObservableValue dataIn;
     private final int[] bits;
     private final String zenohKeyExpr;
+    private final boolean enableQuerying; // whether or not to create a queryable
+    private final boolean enablePublishing; // whether or not to enable publishing
+    private final boolean enableRateLimit;
+
+    private long lastDataSent;
 
     private Publisher publisher;
     private Queryable queryable;
@@ -55,6 +63,9 @@ public class ZenohPublisher extends Node implements Element {
     public ZenohPublisher(ElementAttributes attributes) {
         bits = new int[]{attributes.getBits()};
         zenohKeyExpr = attributes.get(Keys.ZENOH_KEYEXPR);
+        enableQuerying = attributes.get(Keys.ZENOH_ENABLE_QUERYING);
+        enablePublishing = attributes.get(Keys.ZENOH_ENABLE_PUBLISHING);
+        enableRateLimit = attributes.get(Keys.ZENOH_ENABLE_RATE_LIMIT);
     }
 
     @Override
@@ -64,15 +75,10 @@ public class ZenohPublisher extends Node implements Element {
 
     @Override
     public void readInputs() throws NodeException {
-        long value = dataIn.getValue();
-        ByteBuffer buffer = ByteBuffer.allocate(8);
-        buffer.putLong(value);
-        try {
-            publisher.put(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM))).res();
-        } catch (ZenohException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        if (!enablePublishing || enableRateLimit) {
+            return;
         }
+        sendData();
     }
 
     @Override
@@ -89,19 +95,23 @@ public class ZenohPublisher extends Node implements Element {
     public void init(Model model) throws NodeException {
         Session session = SessionHolder.INSTANCE.getSession();
         try {
-            publisher = session.declarePublisher(KeyExpr.tryFrom(this.zenohKeyExpr)).res();
-            queryable = session.declareQueryable(KeyExpr.tryFrom(this.zenohKeyExpr)).with((query) -> {
-                System.out.println("Received query: " + query);
-                try {
-                    long value = dataIn.getValue();
-                    ByteBuffer buffer = ByteBuffer.allocate(8);
-                    buffer.putLong(value);
-                    query.reply(KeyExpr.tryFrom(this.zenohKeyExpr)).success(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM))).res();
-                } catch (ZenohException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }).res();
+            if (enablePublishing) {
+                publisher = session.declarePublisher(KeyExpr.tryFrom(this.zenohKeyExpr)).res();
+            }
+            if (enableQuerying) {
+                queryable = session.declareQueryable(KeyExpr.tryFrom(this.zenohKeyExpr)).with((query) -> {
+                    System.out.println("Received query: " + query);
+                    try {
+                        long value = dataIn.getValue();
+                        ByteBuffer buffer = ByteBuffer.allocate(8);
+                        buffer.putLong(value);
+                        query.reply(KeyExpr.tryFrom(this.zenohKeyExpr)).success(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM))).res();
+                    } catch (ZenohException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }).res();
+            }
         } catch (ZenohException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -110,8 +120,45 @@ public class ZenohPublisher extends Node implements Element {
 
     @Override
     public void cleanup(Model model) {
-        publisher.close();
-        queryable.close();
+        if (enablePublishing)
+            publisher.close();
+        if (enableQuerying)
+            queryable.close();
+    }
+
+    @Override
+    public void registerNodes(Model model) {
+        super.registerNodes(model);
+        model.addZenohSender(this);
+        // model.addSignal(new Signal(label, output));
+    }
+
+    @Override
+    public boolean publishingEnabled() {
+        return enablePublishing;
+    }
+
+    @Override
+    public boolean isDataChanged() {
+        long value = dataIn.getValue();
+        return value != lastDataSent;
+    }
+
+    @Override
+    public void sendData() {
+        if (!enablePublishing || !isDataChanged()) {
+            return;
+        }
+        long value = dataIn.getValue();
+        ByteBuffer buffer = ByteBuffer.allocate(8);
+        buffer.putLong(value);
+        try {
+            publisher.put(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM))).res();
+            lastDataSent = value;
+        } catch (ZenohException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
 }

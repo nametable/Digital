@@ -7,6 +7,7 @@ package de.neemann.digital.core;
 
 import de.neemann.digital.analyse.AnalyseException;
 import de.neemann.digital.core.io.Button;
+import de.neemann.digital.core.io.zenoh.ZenohDataSender;
 import de.neemann.digital.core.wiring.AsyncSeq;
 import de.neemann.digital.core.wiring.Break;
 import de.neemann.digital.core.wiring.Clock;
@@ -61,6 +62,7 @@ public class Model implements Iterable<Node>, SyncAccess {
     private State state = State.BUILDING;
 
     private final ArrayList<Clock> clocks;
+    private final ArrayList<ZenohDataSender> zenohSenders;
     private final ArrayList<Break> breaks;
     private final ArrayList<Reset> resets;
     private final HashMap<Integer, Button> buttonsToMap;
@@ -91,6 +93,7 @@ public class Model implements Iterable<Node>, SyncAccess {
      */
     public Model() {
         this.clocks = new ArrayList<>();
+        this.zenohSenders = new ArrayList<>();
         this.breaks = new ArrayList<>();
         this.resets = new ArrayList<>();
         this.buttonsToMap = new HashMap<>();
@@ -658,6 +661,21 @@ public class Model implements Iterable<Node>, SyncAccess {
      */
     public ArrayList<Clock> getClocks() {
         return clocks;
+    }
+
+    /**
+     * Registers a ZenohSender to the model.
+     * @param sender a ZenohDataSender
+     */
+    public void addZenohSender(ZenohDataSender sender) {
+        zenohSenders.add(sender);
+    }
+
+    /**
+     * @return all registered ZenohSenders
+     */
+    public ArrayList<ZenohDataSender> getZenohSenders() {
+        return zenohSenders;
     }
 
     /**
