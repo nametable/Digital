@@ -95,6 +95,7 @@ public class CircuitComponent extends JComponent implements ChangedListener, Lib
         ATTR_LIST.add(Keys.IS_GENERIC);
         ATTR_LIST.add(Keys.OSCILLATION_DETECTION_COUNTER);
         ATTR_LIST.add(Keys.RECOVER_FROM_OSCILLATION);
+        ATTR_LIST.add(Keys.SETTINGS_ZENOH_SAMPLE_RATE);
     }
 
 

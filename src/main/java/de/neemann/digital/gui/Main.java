@@ -28,6 +28,7 @@ import de.neemann.digital.draw.library.ElementTypeDescriptionCustom;
 import de.neemann.digital.draw.model.AsyncSequentialClock;
 import de.neemann.digital.draw.model.ModelCreator;
 import de.neemann.digital.draw.model.RealTimeClock;
+import de.neemann.digital.draw.model.ZenohDataSenderClock;
 import de.neemann.digital.draw.shapes.Drawable;
 import de.neemann.digital.draw.shapes.ShapeFactory;
 import de.neemann.digital.fsm.gui.FSMFrame;
@@ -1578,6 +1579,9 @@ public final class Main extends JFrame implements ClosingWindowListener.ConfirmS
                     model.setAsyncMode();
                 }
             }
+
+            new ZenohDataSenderClock(model, timerExecutor,
+                    circuitComponent.getCircuit().getAttributes().get(Keys.SETTINGS_ZENOH_SAMPLE_RATE));
 
             circuitComponent.setModeAndReset(true,
                     model.createSync(updateEvent == ModelEventType.MICROSTEP));

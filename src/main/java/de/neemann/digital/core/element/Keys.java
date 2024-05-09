@@ -451,6 +451,15 @@ public final class Keys {
             .setMin(5);
 
     /**
+     * the Zenoh sample rate
+     */
+    public static final Key.KeyInteger SETTINGS_ZENOH_SAMPLE_RATE
+            = new Key.KeyInteger("settingsZenohSampleRate", 100)
+            .setComboBoxValues(1, 5, 10, 100, 500, 1000)
+            .setMin(1)
+            .setMax(1000);
+
+    /**
      * the max number of samples in the default data view
      */
     public static final Key<Integer> SETTINGS_MAX_STEP_COUNT
@@ -1035,4 +1044,22 @@ public final class Keys {
      */
     public static final Key<String> ZENOH_KEYEXPR =
             new Key<>("zenohKeyExpr", "");
+
+    /**
+     * Enable Zenoh publishing
+     */
+    public static final Key<Boolean> ZENOH_ENABLE_PUBLISHING =
+            new Key<>("zenohEnablePublishing", true).setSecondary();
+
+    /**
+     * Enable Zenoh querying
+     */
+    public static final Key<Boolean> ZENOH_ENABLE_QUERYING =
+            new Key<>("zenohEnableQuerying", true).setSecondary();
+
+    /**
+     * Enable Zenoh rate limit
+     */
+    public static final Key<Boolean> ZENOH_ENABLE_RATE_LIMIT =
+            new Key<>("zenohEnableRateLimit", false).setSecondary();
 }
