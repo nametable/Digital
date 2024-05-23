@@ -83,8 +83,14 @@ public class ZenohSubscriber extends Node implements Element {
         
         ByteBuffer buffer = ByteBuffer.wrap(payload);
         
-        // TODO: handle error when buffer is not big enough
-        long value = buffer.getLong();
+        final long value;
+        if (payload.length == 8) {
+            value = buffer.getLong();
+        } else if (payload.length == 4){
+            value = buffer.getInt();
+        } else {
+            throw new RuntimeException("Payload length is not 4 or 8");
+        }
         System.out.println("Subscriber: " + sample.getKeyExpr().toString() + ": hex " + Long.toHexString(value) + " dec " + value);
 
         model.modify(() -> dataOut.setValue(value));
