@@ -13,9 +13,6 @@ public final class SessionHolder {
     public Session getSession() {
         if (session == null) {
             try {
-                // set os.arch
-                System.setProperty("os.arch", "x86_64");
-
                 session = Session.open();
             } catch (Exception e) {
                 e.printStackTrace();
