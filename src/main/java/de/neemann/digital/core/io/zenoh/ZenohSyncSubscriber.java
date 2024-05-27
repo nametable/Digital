@@ -31,12 +31,12 @@ import static de.neemann.digital.core.element.PinInfo.output;
 /**
  * The ZenohSubscriberSync node
  */
-public class ZenohSubscriberSync extends Node implements Element {
+public class ZenohSyncSubscriber extends Node implements Element {
 
     /**
-     * The Zenoh Subscriber description
+     * The Zenoh Synchronous Subscriber description
      */
-    public static final ElementTypeDescription DESCRIPTION = new ElementTypeDescription(ZenohSubscriberSync.class,
+    public static final ElementTypeDescription DESCRIPTION = new ElementTypeDescription(ZenohSyncSubscriber.class,
             input("C").setClock())
             .addAttribute(Keys.BITS)
             .addAttribute(Keys.ROTATE)
@@ -58,7 +58,7 @@ public class ZenohSubscriberSync extends Node implements Element {
      *
      * @param attributes The components attributes
      */
-    public ZenohSubscriberSync(ElementAttributes attributes) {
+    public ZenohSyncSubscriber(ElementAttributes attributes) {
         bits = new int[] { attributes.getBits() };
         dataOut = new ObservableValue("out", bits[0]).setPinDescription(DESCRIPTION);
         zenohKeyExpr = attributes.get(Keys.ZENOH_KEYEXPR);

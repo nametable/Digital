@@ -21,6 +21,7 @@ import de.neemann.digital.core.io.zenoh.ZenohRAMDualAccess;
 import de.neemann.digital.core.io.zenoh.ZenohRAMDualPort;
 import de.neemann.digital.core.io.zenoh.ZenohRegister;
 import de.neemann.digital.core.io.zenoh.ZenohSubscriber;
+import de.neemann.digital.core.io.zenoh.ZenohSyncSubscriber;
 import de.neemann.digital.core.memory.*;
 import de.neemann.digital.core.pld.DiodeBackward;
 import de.neemann.digital.core.pld.DiodeForward;
@@ -161,6 +162,7 @@ public class ElementLibrary implements Iterable<ElementLibrary.ElementContainer>
                                 .add(MIDI.DESCRIPTION)
                                 .add(ZenohPublisher.DESCRIPTION)
                                 .add(ZenohSubscriber.DESCRIPTION)
+                                .add(ZenohSyncSubscriber.DESCRIPTION)
                         )
                 )
                 .add(new LibraryNode(Lang.get("lib_wires"))
