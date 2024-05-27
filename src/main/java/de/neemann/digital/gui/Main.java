@@ -755,9 +755,6 @@ public final class Main extends JFrame implements ClosingWindowListener.ConfirmS
                                 // print test message
                                 System.out.println("Exporting to JSON: " + file.getAbsolutePath());
 
-                                // set os.arch
-                                System.setProperty("os.arch", "x86_64");
-
                                 JSONObject json = new JSONObject();
                                 Session session = Session.open();
                                 session.put(KeyExpr.tryFrom("host/digital/hey"), "Yo, I sent this from Java!").res();
