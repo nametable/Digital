@@ -13,6 +13,9 @@ public final class SessionHolder {
     public Session getSession() {
         if (session == null) {
             try {
+                // set arch as x86_64 - temp fix for zenoh 0.10.1-rc
+                System.setProperty("os.arch", "x86_64");
+
                 session = Session.open();
             } catch (Exception e) {
                 e.printStackTrace();
