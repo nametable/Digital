@@ -15,7 +15,6 @@ import io.zenoh.Session;
 import io.zenoh.exceptions.ZenohException;
 import io.zenoh.keyexpr.KeyExpr;
 import io.zenoh.prelude.Encoding;
-import io.zenoh.prelude.KnownEncoding;
 import io.zenoh.publication.Publisher;
 import io.zenoh.queryable.Queryable;
 
@@ -103,7 +102,7 @@ public class ZenohPublisher extends Node implements Element, ZenohDataSender {
                         long value = dataIn.getValue();
                         ByteBuffer buffer = ByteBuffer.allocate(8);
                         buffer.putLong(value);
-                        query.reply(KeyExpr.tryFrom(this.zenohKeyExpr)).success(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM))).res();
+                        query.reply(KeyExpr.tryFrom(this.zenohKeyExpr)).success(new io.zenoh.value.Value(buffer.array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null))).res();
                     } catch (ZenohException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -150,13 +149,8 @@ public class ZenohPublisher extends Node implements Element, ZenohDataSender {
         long value = dataIn.getValue();
         ByteBuffer buffer = ByteBuffer.allocate(8);
         buffer.putLong(value);
-        try {
-            publisher.put(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM))).res();
-            lastDataSent = value;
-        } catch (ZenohException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        publisher.put(new io.zenoh.value.Value(buffer.array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null))).res();
+        lastDataSent = value;
     }
 
 }

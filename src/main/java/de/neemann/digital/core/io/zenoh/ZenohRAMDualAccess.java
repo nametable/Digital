@@ -20,7 +20,6 @@ import io.zenoh.Session;
 import io.zenoh.exceptions.ZenohException;
 import io.zenoh.keyexpr.KeyExpr;
 import io.zenoh.prelude.Encoding;
-import io.zenoh.prelude.KnownEncoding;
 import io.zenoh.publication.Publisher;
 import io.zenoh.queryable.Queryable;
 import io.zenoh.subscriber.Subscriber;
@@ -81,14 +80,9 @@ public class ZenohRAMDualAccess extends RAMDualAccess {
         MemoryRangeMessage message = new MemoryRangeMessage(bytesPerWord, addr, new long[] { data });
 
         // System.out.println("writeToMemory called!");
-        try {
-            changePublisher.put(
-                    new io.zenoh.value.Value(message.toByteBuffer().array(), new Encoding(KnownEncoding.APP_OCTET_STREAM)))
-                    .res();
-        } catch (ZenohException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        changePublisher.put(
+                new io.zenoh.value.Value(message.toByteBuffer().array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null)))
+                .res();
     }
 
     @Override
@@ -120,13 +114,7 @@ public class ZenohRAMDualAccess extends RAMDualAccess {
                             model.modify(() -> out2.setValue(this.memory.getDataWord((int) addr2In.getValue())));
                         }
 
-                        try {
-                            changePublisher.put(sample.getValue()).res();
-                        } catch (ZenohException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-
+                        changePublisher.put(sample.getValue()).res();
                     }).res();
             getQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExpr + "/get")).with(query -> {
                 System.out.println("Zenoh Dual Access RAM - received /get query: " + query);
@@ -149,7 +137,7 @@ public class ZenohRAMDualAccess extends RAMDualAccess {
                 try {
                     query.reply(query.getKeyExpr())
                             .success(new io.zenoh.value.Value(replyMessage.toByteBuffer().array(),
-                                    new Encoding(KnownEncoding.APP_OCTET_STREAM)))
+                            new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null)))
                             .res();
                 } catch (ZenohException e) {
                     // TODO Auto-generated catch block
@@ -165,7 +153,7 @@ public class ZenohRAMDualAccess extends RAMDualAccess {
                     buffer.putInt(this.size);
                     buffer.putInt(this.bits);
                     query.reply(query.getKeyExpr())
-                            .success(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM)))
+                            .success(new io.zenoh.value.Value(buffer.array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null)))
                             .res();
                 } catch (ZenohException e) {
                     // TODO Auto-generated catch block

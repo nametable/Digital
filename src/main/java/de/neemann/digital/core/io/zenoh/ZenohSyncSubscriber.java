@@ -18,7 +18,6 @@ import io.zenoh.exceptions.KeyExprException;
 import io.zenoh.exceptions.ZenohException;
 import io.zenoh.keyexpr.KeyExpr;
 import io.zenoh.prelude.Encoding;
-import io.zenoh.prelude.KnownEncoding;
 import io.zenoh.sample.Sample;
 import io.zenoh.subscriber.Subscriber;
 
@@ -76,17 +75,21 @@ public class ZenohSyncSubscriber extends Node implements Element {
         if (clock & !lastClock) {
             // if (writeEnable.getBool())
             // server.send((int) dataIn.getValue());
-            ringBuffer.delete();
+            // ringBuffer.delete();
         }
         lastClock = clock;
     }
 
     @Override
     public void writeOutputs() throws NodeException {
-        if (ringBuffer.hasData())
+        boolean clock = clockValue.getBool();
+        if (clock) return;
+        if (ringBuffer.hasData()) {
             dataOut.setValue(ringBuffer.peek());
-        else
+            ringBuffer.delete();
+        } else {
             dataOut.setToHighZ();
+        }
     }
 
     @Override
