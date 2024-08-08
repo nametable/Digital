@@ -13,7 +13,6 @@ import io.zenoh.Session;
 import io.zenoh.exceptions.ZenohException;
 import io.zenoh.keyexpr.KeyExpr;
 import io.zenoh.prelude.Encoding;
-import io.zenoh.prelude.KnownEncoding;
 import io.zenoh.publication.Publisher;
 import io.zenoh.queryable.Queryable;
 import io.zenoh.subscriber.Subscriber;
@@ -85,7 +84,7 @@ public class ZenohRegister extends Register implements ZenohDataSender {
                     ByteBuffer buffer = ByteBuffer.allocate(8);
                     buffer.putLong(this.value);
                     query.reply(query.getKeyExpr())
-                            .success(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM)))
+                            .success(new io.zenoh.value.Value(buffer.array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null)))
                             .res();
                 } catch (ZenohException e) {
                     // TODO Auto-generated catch block
@@ -102,7 +101,7 @@ public class ZenohRegister extends Register implements ZenohDataSender {
                     buffer.putInt(labelBytes.length);
                     buffer.put(labelBytes);
                     query.reply(query.getKeyExpr())
-                            .success(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM)))
+                            .success(new io.zenoh.value.Value(buffer.array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null)))
                             .res();
                 } catch (ZenohException e) {
                     // TODO Auto-generated catch block
@@ -143,14 +142,10 @@ public class ZenohRegister extends Register implements ZenohDataSender {
     public void sendData() {
         boolean isChanging = this.value != this.lastDataSent;
         if (isChanging && enablePublishing) {
-            try {
-                ByteBuffer buffer = ByteBuffer.allocate(8);
-                buffer.putLong(this.value);
-                changePublisher.put(new io.zenoh.value.Value(buffer.array(), new Encoding(KnownEncoding.APP_OCTET_STREAM))).res();
-                lastDataSent = this.value;
-            } catch (ZenohException e) {
-                e.printStackTrace();
-            }
+            ByteBuffer buffer = ByteBuffer.allocate(8);
+            buffer.putLong(this.value);
+            changePublisher.put(new io.zenoh.value.Value(buffer.array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null))).res();
+            lastDataSent = this.value;
         }
     }
 

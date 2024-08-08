@@ -18,7 +18,6 @@ import io.zenoh.exceptions.KeyExprException;
 import io.zenoh.exceptions.ZenohException;
 import io.zenoh.keyexpr.KeyExpr;
 import io.zenoh.prelude.Encoding;
-import io.zenoh.prelude.KnownEncoding;
 import io.zenoh.query.Reply;
 import io.zenoh.query.Reply.Success;
 import io.zenoh.sample.Sample;
