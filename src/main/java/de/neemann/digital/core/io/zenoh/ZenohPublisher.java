@@ -95,6 +95,8 @@ public class ZenohPublisher extends Node implements Element, ZenohDataSender {
         try {
             if (enablePublishing) {
                 publisher = session.declarePublisher(KeyExpr.tryFrom(this.zenohKeyExpr)).res();
+                // publish initial value usually 0
+                sendData();
             }
             if (enableQuerying) {
                 queryable = session.declareQueryable(KeyExpr.tryFrom(this.zenohKeyExpr)).with((query) -> {

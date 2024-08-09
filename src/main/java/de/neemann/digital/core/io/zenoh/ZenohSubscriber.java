@@ -19,11 +19,14 @@ import io.zenoh.exceptions.ZenohException;
 import io.zenoh.keyexpr.KeyExpr;
 import io.zenoh.prelude.Encoding;
 import io.zenoh.prelude.KnownEncoding;
+import io.zenoh.query.Reply;
+import io.zenoh.query.Reply.Success;
 import io.zenoh.sample.Sample;
 import io.zenoh.subscriber.Subscriber;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 import static de.neemann.digital.core.element.PinInfo.input;
 import static de.neemann.digital.core.element.PinInfo.output;
@@ -107,8 +110,19 @@ public class ZenohSubscriber extends Node implements Element {
                     .with(sample -> this.onSample(sample)).res();
             subscriber.getReceiver();
 
-            session.get(KeyExpr.tryFrom(this.zenohKeyExpr)).res();
+            Optional<Reply> replyWrapper = session.get(KeyExpr.tryFrom(this.zenohKeyExpr)).res().take();
+            if (replyWrapper.isEmpty()) {
+                return;
+            }
+            Reply reply = replyWrapper.get();
+            if (reply instanceof Success) {
+                Sample sample = ((Success) reply).getSample();
+                this.onSample(sample);
+            }
         } catch (ZenohException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -116,7 +130,7 @@ public class ZenohSubscriber extends Node implements Element {
 
     @Override
     public void cleanup(Model model) {
-        System.out.println("Cleaning up ZenohSubscriber");
+        System.out.printf("Cleaning up ZenohSubscriber: %s\n", this.zenohKeyExpr);
         subscriber.close();
     }
 

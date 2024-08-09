@@ -8,11 +8,11 @@ def listener(sample: Sample):
     if sample.encoding == Encoding.TEXT_PLAIN():
         pass
     else:
-        # print(f"Received {sample.kind} ('{sample.key_expr}': '{sample.payload}')")
-        value = struct.unpack('>Q', sample.payload)[0]
+        print(f"Received {sample.kind} ('{sample.key_expr}': '{sample.payload}')")
+        # value = struct.unpack('>Q', sample.payload)[0]
         # print(f"Received {sample.kind} ('{sample.key_expr}': '{sample.payload.decode('utf-8')}')")
-        print(f"{sample.key_expr}: {value}")
-        print(f"timestamp: {time.time()}")
+        # print(f"{sample.key_expr}: {value}")
+        # print(f"timestamp: {time.time()}")
 
 session: Session = zenoh.open()
 # subscriber: Subscriber = session.declare_subscriber('zenoh_test/clock/**', listener)

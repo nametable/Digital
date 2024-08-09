@@ -1514,7 +1514,8 @@ public final class Main extends JFrame implements ClosingWindowListener.ConfirmS
         if (model != null)
             // cleanup model (release resources)
             model.cleanup();
-            model.close();
+            if (model != null)
+                model.close();
 
         modelCreator = null;
         model = null;
