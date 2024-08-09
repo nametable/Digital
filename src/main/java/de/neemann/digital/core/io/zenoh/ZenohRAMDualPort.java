@@ -149,7 +149,6 @@ public class ZenohRAMDualPort extends RAMDualPort {
             }).res();
         } catch (ZenohException e) {
             e.printStackTrace();
-            // throw new NodeException(e);
         }
     }
 

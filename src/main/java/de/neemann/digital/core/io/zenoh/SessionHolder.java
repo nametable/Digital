@@ -1,5 +1,6 @@
 package de.neemann.digital.core.io.zenoh;
 
+import io.zenoh.Config;
 import io.zenoh.Session;
 
 public final class SessionHolder {
@@ -13,10 +14,9 @@ public final class SessionHolder {
     public Session getSession() {
         if (session == null) {
             try {
-                // set arch as x86_64 - temp fix for zenoh 0.10.1-rc
-                System.setProperty("os.arch", "x86_64");
+                Config config = Config.Companion.from("{\"transport\":{\"link\":{\"tx\":{\"batching\":false}}}}");
+                session = Session.open(config);
 
-                session = Session.open();
             } catch (Exception e) {
                 e.printStackTrace();
             }

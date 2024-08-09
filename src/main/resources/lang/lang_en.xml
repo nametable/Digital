@@ -932,18 +932,59 @@
     <string name="elem_TransGate_pin_S">control input.</string>
     <string name="elem_TransGate_pin_~S">inverted control input</string>
 
-    <string name="elem_ZenohPublisher">Z Pub</string>
+    <string name="elem_ZenohPublisher">Zenoh Publisher</string>
+    <string name="elem_ZenohPublisher_short">Z Pub</string>
     <string name="elem_ZenohPublisher_tt">Whenever data on `in` is changed, the new value will be published to the configured topic name. The topic will also be queryable.</string>
     <string name="elem_ZenohPublisher_pin_in">The data which is published on change.</string>
 
-    <string name="elem_ZenohSubscriber">Z Sub</string>
+    <string name="elem_ZenohSubscriber">Zenoh Subscriber</string>
+    <string name="elem_ZenohSubscriber_short">Z Sub</string>
     <string name="elem_ZenohSubscriber_tt">Whenever data on the configured topic name is received, the new value will be output on `out`.</string>
     <string name="elem_ZenohSubscriber_pin_out">The data last received.</string>
 
-    <string name="elem_ZenohSyncSubscriber">Z Sync Sub</string>
+    <string name="elem_ZenohSyncSubscriber">Zenoh Synchronous Subscriber</string>
+    <string name="elem_ZenohSyncSubscriber_short">Z Sync Sub</string>
     <string name="elem_ZenohSyncSubscriber_tt">Whenever a rising clock is detected, the next value in the buffer is popped off and output on `out`.</string>
     <string name="elem_ZenohSyncSubscriber_pin_out">The data last popped off the buffer.</string>
     <string name="elem_ZenohSyncSubscriber_pin_C">The clock input.</string>
+
+    <string name="elem_ZenohRAMDualAccess">Zenoh RAM, Dual Port</string>
+    <string name="elem_ZenohRAMDualAccess_short">Z RAM</string>
+    <string name="elem_ZenohRAMDualAccess_tt">Zenoh RAM with one port that allows to write to and read from the RAM, and a second
+        read only port.
+        Changes to memory are published to zenoh as {basekey}/changes. Memory regions can be set via {basekey}/set. The memory characteristics
+        can be obtained from {basekey}/info.</string>
+    <string name="elem_ZenohRAMDualAccess_pin_1D">Output Port 1</string>
+    <string name="elem_ZenohRAMDualAccess_pin_2D">Output Port 2</string>
+    <string name="elem_ZenohRAMDualAccess_pin_1A">The address at which port 1 is read or written.</string>
+    <string name="elem_ZenohRAMDualAccess_pin_2A">The address used to read via port 2.</string>
+    <string name="elem_ZenohRAMDualAccess_pin_C">Clock</string>
+    <string name="elem_ZenohRAMDualAccess_pin_1Din">The data to be stored in the RAM.</string>
+    <string name="elem_ZenohRAMDualAccess_pin_ld">If this input is high the output is activated and the data is visible at the output 1D.</string>
+    <string name="elem_ZenohRAMDualAccess_pin_str">If this input is high and when the clock becomes high, the data is
+        stored.
+    </string>
+
+    <string name="elem_ZenohRAMDualPort">Zenoh RAM, separated Ports</string>
+    <string name="elem_ZenohRAMDualPort_short">Z RAM</string>
+    <string name="elem_ZenohRAMDualPort_tt">A RAM module with separate inputs for storing and output for reading the stored data. Changes are published to {basekey}/changes. A region can be written to over with topic {basekey}/set.</string>
+    <string name="elem_ZenohRAMDualPort_pin_A">The address to read from or write to.</string>
+    <string name="elem_ZenohRAMDualPort_pin_C">Clock input</string>
+    <string name="elem_ZenohRAMDualPort_pin_Din">The data to be stored in the RAM.</string>
+    <string name="elem_ZenohRAMDualPort_pin_D">The data output pin</string>
+    <string name="elem_ZenohRAMDualPort_pin_ld">If this input is high the output is activated and the data is visible at the output.</string>
+    <string name="elem_ZenohRAMDualPort_pin_str">If this input is high and when the clock becomes high, the data is stored.
+    </string>
+
+    <string name="elem_ZenohRegister">Zenoh Register</string>
+    <string name="elem_ZenohRegister_short">Z Reg</string>
+    <string name="elem_ZenohRegister_tt">A component to store values. The bit width of the data word can be selected.
+        Unlike a D flip-flop, the register provides an input which enables the clock. Changes are published to {basekey}/changes. The register value
+        can be set with the topic {basekey}/set.</string>
+    <string name="elem_ZenohRegister_pin_D">Input pin of the data word to be stored.</string>
+    <string name="elem_ZenohRegister_pin_C">Clock input. A rising edge stores the value at the D pin.</string>
+    <string name="elem_ZenohRegister_pin_en">Enable pin. Storing a value works only if this pin is set high.</string>
+    <string name="elem_ZenohRegister_pin_Q">Returns the stored value.</string>
 
     <!-- Misc -->
 
@@ -1711,6 +1752,9 @@
     <string name="key_colorScheme_CUSTOM">User Defined</string>
     <string name="key_customColorScheme">User Defined Colors</string>
     <string name="key_zenohKeyExpr">Zenoh Key Expression</string>
+    <string name="key_zenohEnablePublishing">Enable Zenoh Publishing</string>
+    <string name="key_zenohEnableQuerying">Enable Zenoh Querying</string>
+    <string name="key_zenohEnableRateLimit">Enable Zenoh Rate Limit</string>
     
     <string name="menu_colorSchemePreset">Preset</string>
     <string name="colorName_BACKGROUND">Background</string>

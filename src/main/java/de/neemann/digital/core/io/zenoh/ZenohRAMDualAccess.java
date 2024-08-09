@@ -79,7 +79,6 @@ public class ZenohRAMDualAccess extends RAMDualAccess {
 
         MemoryRangeMessage message = new MemoryRangeMessage(bytesPerWord, addr, new long[] { data });
 
-        // System.out.println("writeToMemory called!");
         changePublisher.put(
                 new io.zenoh.value.Value(message.toByteBuffer().array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null)))
                 .res();
@@ -160,6 +159,17 @@ public class ZenohRAMDualAccess extends RAMDualAccess {
                     e.printStackTrace();
                 }
             }).res();
+
+            // send initial info
+            try {
+                ByteBuffer buffer = ByteBuffer.allocate(8);
+                buffer.putInt(this.size);
+                buffer.putInt(this.bits);
+                session.put(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/info"), new io.zenoh.value.Value(buffer.array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null))).res();
+            } catch (ZenohException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         } catch (ZenohException e) {
             e.printStackTrace();
             // throw new NodeException(e);
