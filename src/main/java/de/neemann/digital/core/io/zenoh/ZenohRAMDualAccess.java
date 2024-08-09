@@ -28,7 +28,7 @@ import java.nio.ByteBuffer;
 
 public class ZenohRAMDualAccess extends RAMDualAccess {
 
-    private final String baseZenohKeyExpr;
+    private final String baseZenohKeyExprStr;
     private int bytesPerWord;
 
     private Publisher changePublisher;
@@ -38,7 +38,7 @@ public class ZenohRAMDualAccess extends RAMDualAccess {
 
     public ZenohRAMDualAccess(ElementAttributes attributes) {
         super(attributes);
-        baseZenohKeyExpr = attributes.get(Keys.ZENOH_KEYEXPR);
+        baseZenohKeyExprStr = attributes.get(Keys.ZENOH_KEYEXPR);
         bytesPerWord = bytesPerWord(this.bits);
     }
 
@@ -90,8 +90,8 @@ public class ZenohRAMDualAccess extends RAMDualAccess {
 
         Session session = SessionHolder.INSTANCE.getSession();
         try {
-            changePublisher = session.declarePublisher(KeyExpr.tryFrom(this.baseZenohKeyExpr + "/changes")).res();
-            setSubscriber = session.declareSubscriber(KeyExpr.tryFrom(this.baseZenohKeyExpr + "/set"))
+            changePublisher = session.declarePublisher(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/changes")).res();
+            setSubscriber = session.declareSubscriber(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/set"))
                     .with(sample -> {
                         byte[] payload = sample.getValue().getPayload();
                         ByteBuffer buffer = ByteBuffer.wrap(payload);
@@ -116,7 +116,7 @@ public class ZenohRAMDualAccess extends RAMDualAccess {
 
                         changePublisher.put(sample.getValue()).res();
                     }).res();
-            getQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExpr + "/get")).with(query -> {
+            getQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/get")).with(query -> {
                 System.out.println("Zenoh Dual Access RAM - received /get query: " + query);
                 // - 4 bytes of address
                 // - 4 bytes of length
@@ -146,7 +146,7 @@ public class ZenohRAMDualAccess extends RAMDualAccess {
 
             }).res();
 
-            infoQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExpr + "/info")).with(query -> {
+            infoQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/info")).with(query -> {
                 System.out.println("Zenoh Dual Access RAM - received /info query: " + query);
                 try {
                     ByteBuffer buffer = ByteBuffer.allocate(8);

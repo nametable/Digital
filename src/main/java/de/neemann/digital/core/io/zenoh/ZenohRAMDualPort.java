@@ -45,7 +45,7 @@ public class ZenohRAMDualPort extends RAMDualPort {
             .addAttribute(Keys.LABEL)
             .addAttribute(Keys.ZENOH_KEYEXPR);
 
-    private final String baseZenohKeyExpr;
+    private final String baseZenohKeyExprStr;
     
     private Publisher changePublisher;
     private Subscriber setSubscriber;
@@ -56,7 +56,7 @@ public class ZenohRAMDualPort extends RAMDualPort {
     
     public ZenohRAMDualPort(ElementAttributes attributes) {
         super(attributes);
-        baseZenohKeyExpr = attributes.get(Keys.ZENOH_KEYEXPR);
+        baseZenohKeyExprStr = attributes.get(Keys.ZENOH_KEYEXPR);
         bytesPerWord = bytesPerWord(this.bits);
     }
 
@@ -130,12 +130,12 @@ public class ZenohRAMDualPort extends RAMDualPort {
         this.model = model;
         Session session = SessionHolder.INSTANCE.getSession();
         try {
-            changePublisher = session.declarePublisher(KeyExpr.tryFrom(this.baseZenohKeyExpr + "/changes")).res();
-            setSubscriber = session.declareSubscriber(KeyExpr.tryFrom(this.baseZenohKeyExpr + "/set"))
+            changePublisher = session.declarePublisher(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/changes")).res();
+            setSubscriber = session.declareSubscriber(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/set"))
                     .with(sample -> this.onSetMemoryMessage(sample)).res();
-            getQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExpr + "/get")).with(query -> onGetQuery(query)).res();
+            getQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/get")).with(query -> onGetQuery(query)).res();
             
-            infoQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExpr + "/info")).with(query -> {
+            infoQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/info")).with(query -> {
                 System.out.println("Received query: " + query);
                 try {
                     ByteBuffer buffer = ByteBuffer.allocate(8);

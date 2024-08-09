@@ -40,7 +40,7 @@ public class ZenohRegister extends Register implements ZenohDataSender {
             .addAttribute(Keys.ZENOH_ENABLE_PUBLISHING)
             .addAttribute(Keys.ZENOH_ENABLE_RATE_LIMIT);
 
-    private final String baseZenohKeyExpr;
+    private final String baseZenohKeyExprStr;
     private final boolean enablePublishing; // whether or not to enable publishing
     private final boolean enableRateLimit;
 
@@ -53,7 +53,7 @@ public class ZenohRegister extends Register implements ZenohDataSender {
 
     public ZenohRegister(ElementAttributes attributes) {
         super(attributes);
-        baseZenohKeyExpr = attributes.get(Keys.ZENOH_KEYEXPR);
+        baseZenohKeyExprStr = attributes.get(Keys.ZENOH_KEYEXPR);
         enablePublishing = attributes.get(Keys.ZENOH_ENABLE_PUBLISHING);
         enableRateLimit = attributes.get(Keys.ZENOH_ENABLE_RATE_LIMIT);
     }
@@ -71,15 +71,15 @@ public class ZenohRegister extends Register implements ZenohDataSender {
         Session session = SessionHolder.INSTANCE.getSession();
         try {
             if (enablePublishing)
-                changePublisher = session.declarePublisher(KeyExpr.tryFrom(this.baseZenohKeyExpr + "/changes")).res();
-            setSubscriber = session.declareSubscriber(KeyExpr.tryFrom(this.baseZenohKeyExpr + "/set")).with(sample -> {
+                changePublisher = session.declarePublisher(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/changes")).res();
+            setSubscriber = session.declareSubscriber(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/set")).with(sample -> {
                 ByteBuffer buffer = ByteBuffer.wrap(sample.getValue().getPayload());
                 this.value = buffer.getLong();
                 model.modify(() -> q.setValue(this.value));
                 sendData();
             }).res();
 
-            getQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExpr + "/get")).with(query -> {
+            getQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/get")).with(query -> {
                 try {
                     ByteBuffer buffer = ByteBuffer.allocate(8);
                     buffer.putLong(this.value);
@@ -92,7 +92,7 @@ public class ZenohRegister extends Register implements ZenohDataSender {
                 }
             }).res();
 
-            infoQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExpr + "/info")).with(query -> {
+            infoQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/info")).with(query -> {
                 System.out.println("Received query: " + query);
                 try {
                     byte[] labelBytes = this.label.getBytes();

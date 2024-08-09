@@ -46,7 +46,8 @@ public class ZenohSyncSubscriber extends Node implements Element {
     private ObservableValue clockValue;
     private boolean lastClock;
     private final int[] bits;
-    private final String zenohKeyExpr;
+    private KeyExpr zenohKeyExpr;
+    private final String zenohKeyExprStr;
     private Model model;
     private RingBuffer ringBuffer;
 
@@ -60,7 +61,7 @@ public class ZenohSyncSubscriber extends Node implements Element {
     public ZenohSyncSubscriber(ElementAttributes attributes) {
         bits = new int[] { attributes.getBits() };
         dataOut = new ObservableValue("out", bits[0]).setPinDescription(DESCRIPTION);
-        zenohKeyExpr = attributes.get(Keys.ZENOH_KEYEXPR);
+        zenohKeyExprStr = attributes.get(Keys.ZENOH_KEYEXPR);
     }
 
     @Override
@@ -125,11 +126,12 @@ public class ZenohSyncSubscriber extends Node implements Element {
         this.model = model;
 
         try {
-            subscriber = session.declareSubscriber(KeyExpr.tryFrom(this.zenohKeyExpr))
+            zenohKeyExpr = KeyExpr.tryFrom(this.zenohKeyExprStr);
+            subscriber = session.declareSubscriber(this.zenohKeyExpr)
                     .with(sample -> this.onSample(sample)).res();
             subscriber.getReceiver();
 
-            session.get(KeyExpr.tryFrom(this.zenohKeyExpr)).res();
+            session.get(this.zenohKeyExpr).res();
         } catch (ZenohException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

@@ -46,7 +46,8 @@ public class ZenohSubscriber extends Node implements Element {
 
     private ObservableValue dataOut;
     private final int[] bits;
-    private final String zenohKeyExpr;
+    private KeyExpr zenohKeyExpr;
+    private final String zenohKeyExprStr;
     private Model model;
 
     private Subscriber subscriber;
@@ -59,7 +60,7 @@ public class ZenohSubscriber extends Node implements Element {
     public ZenohSubscriber(ElementAttributes attributes) {
         bits = new int[] { attributes.getBits() };
         dataOut = new ObservableValue("out", bits[0]).setPinDescription(DESCRIPTION);
-        zenohKeyExpr = attributes.get(Keys.ZENOH_KEYEXPR);
+        zenohKeyExprStr = attributes.get(Keys.ZENOH_KEYEXPR);
     }
 
     @Override
@@ -105,11 +106,12 @@ public class ZenohSubscriber extends Node implements Element {
         this.model = model;
 
         try {
-            subscriber = session.declareSubscriber(KeyExpr.tryFrom(this.zenohKeyExpr))
+            this.zenohKeyExpr = KeyExpr.tryFrom(this.zenohKeyExprStr);
+            subscriber = session.declareSubscriber(this.zenohKeyExpr)
                     .with(sample -> this.onSample(sample)).res();
             subscriber.getReceiver();
 
-            Optional<Reply> replyWrapper = session.get(KeyExpr.tryFrom(this.zenohKeyExpr)).res().take();
+            Optional<Reply> replyWrapper = session.get(this.zenohKeyExpr).res().take();
             if (replyWrapper.isEmpty()) {
                 return;
             }

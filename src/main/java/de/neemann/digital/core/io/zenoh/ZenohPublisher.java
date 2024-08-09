@@ -42,7 +42,8 @@ public class ZenohPublisher extends Node implements Element, ZenohDataSender {
 
     private ObservableValue dataIn;
     private final int[] bits;
-    private final String zenohKeyExpr;
+    private final String zenohKeyExprStr;
+    private KeyExpr zenohKeyExpr;
     private final boolean enableQuerying; // whether or not to create a queryable
     private final boolean enablePublishing; // whether or not to enable publishing
     private final boolean enableRateLimit;
@@ -59,7 +60,7 @@ public class ZenohPublisher extends Node implements Element, ZenohDataSender {
      */
     public ZenohPublisher(ElementAttributes attributes) {
         bits = new int[]{attributes.getBits()};
-        zenohKeyExpr = attributes.get(Keys.ZENOH_KEYEXPR);
+        zenohKeyExprStr = attributes.get(Keys.ZENOH_KEYEXPR);
         enableQuerying = attributes.get(Keys.ZENOH_ENABLE_QUERYING);
         enablePublishing = attributes.get(Keys.ZENOH_ENABLE_PUBLISHING);
         enableRateLimit = attributes.get(Keys.ZENOH_ENABLE_RATE_LIMIT);
@@ -92,19 +93,20 @@ public class ZenohPublisher extends Node implements Element, ZenohDataSender {
     public void init(Model model) throws NodeException {
         Session session = SessionHolder.INSTANCE.getSession();
         try {
+            this.zenohKeyExpr = KeyExpr.tryFrom(this.zenohKeyExprStr);
             if (enablePublishing) {
-                publisher = session.declarePublisher(KeyExpr.tryFrom(this.zenohKeyExpr)).res();
+                publisher = session.declarePublisher(this.zenohKeyExpr).res();
                 // publish initial value usually 0
                 sendData();
             }
             if (enableQuerying) {
-                queryable = session.declareQueryable(KeyExpr.tryFrom(this.zenohKeyExpr)).with((query) -> {
+                queryable = session.declareQueryable(this.zenohKeyExpr).with((query) -> {
                     System.out.println("Received query: " + query);
                     try {
                         long value = dataIn.getValue();
                         ByteBuffer buffer = ByteBuffer.allocate(8);
                         buffer.putLong(value);
-                        query.reply(KeyExpr.tryFrom(this.zenohKeyExpr)).success(new io.zenoh.value.Value(buffer.array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null))).res();
+                        query.reply(this.zenohKeyExpr).success(new io.zenoh.value.Value(buffer.array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null))).res();
                     } catch (ZenohException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
