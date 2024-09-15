@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<circuit>
+  <version>2</version>
+  <attributes/>
+  <visualElements>
+    <visualElement>
+      <elementName>ZenohPublisher</elementName>
+      <elementAttributes>
+        <entry>
+          <string>zenohKeyExpr</string>
+          <string>test/pub1</string>
+        </entry>
+      </elementAttributes>
+      <pos x="780" y="360"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Clock</elementName>
+      <elementAttributes>
+        <entry>
+          <string>runRealTime</string>
+          <boolean>true</boolean>
+        </entry>
+      </elementAttributes>
+      <pos x="680" y="360"/>
+    </visualElement>
+  </visualElements>
+  <wires>
+    <wire>
+      <p1 x="680" y="360"/>
+      <p2 x="780" y="360"/>
+    </wire>
+  </wires>
+  <measurementOrdering/>
+</circuit>
