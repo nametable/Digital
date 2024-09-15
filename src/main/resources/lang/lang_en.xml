@@ -1752,6 +1752,7 @@
     <string name="key_colorScheme_CUSTOM">User Defined</string>
     <string name="key_customColorScheme">User Defined Colors</string>
     <string name="key_zenohKeyExpr">Zenoh Key Expression</string>
+    <string name="key_zenohKeyExpr_tt">A Zenoh key expression used to specify the topic to use when publishing, or the acceptable topics to use when subscribing. See https://zenoh.io/docs/manual/abstractions/#key-expression</string>
     <string name="key_zenohEnablePublishing">Enable Zenoh Publishing</string>
     <string name="key_zenohEnableQuerying">Enable Zenoh Querying</string>
     <string name="key_zenohEnableRateLimit">Enable Zenoh Rate Limit</string>

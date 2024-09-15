@@ -10,13 +10,16 @@ import static de.neemann.digital.core.element.PinInfo.input;
 import static de.neemann.digital.core.element.PinInfo.output;
 
 import de.neemann.digital.core.Model;
+import de.neemann.digital.core.NodeException;
 import de.neemann.digital.core.element.ElementAttributes;
 import de.neemann.digital.core.element.ElementTypeDescription;
+import de.neemann.digital.core.element.ImmutableList;
 import de.neemann.digital.core.element.Keys;
 import de.neemann.digital.core.io.zenoh.ram_messages.GetQueryMessage;
 import de.neemann.digital.core.io.zenoh.ram_messages.MemoryRangeMessage;
 import de.neemann.digital.core.memory.RAMDualAccess;
 import io.zenoh.Session;
+import io.zenoh.exceptions.KeyExprException;
 import io.zenoh.exceptions.ZenohException;
 import io.zenoh.keyexpr.KeyExpr;
 import io.zenoh.prelude.Encoding;
@@ -85,7 +88,7 @@ public class ZenohRAMDualAccess extends RAMDualAccess {
     }
 
     @Override
-    public void init(Model model) {
+    public void init(Model model) throws NodeException {
 
         Session session = SessionHolder.INSTANCE.getSession();
         try {
@@ -171,8 +174,11 @@ public class ZenohRAMDualAccess extends RAMDualAccess {
                 e.printStackTrace();
             }
         } catch (ZenohException e) {
-            e.printStackTrace();
-            // throw new NodeException(e);
+            if (e instanceof KeyExprException) {
+                throw new NodeException("Invalid Zenoh key expression: \"" + this.baseZenohKeyExprStr + "\"", this, -1, new ImmutableList<>());
+            } else {
+                throw new NodeException(e.getMessage(), this, -1, new ImmutableList<>());
+            }
         }
     }
 

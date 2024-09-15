@@ -9,26 +9,20 @@ import de.neemann.digital.core.*;
 import de.neemann.digital.core.element.Element;
 import de.neemann.digital.core.element.ElementAttributes;
 import de.neemann.digital.core.element.ElementTypeDescription;
+import de.neemann.digital.core.element.ImmutableList;
 import de.neemann.digital.core.element.Keys;
-import de.neemann.digital.core.io.telnet.ServerHolder;
-import de.neemann.digital.draw.elements.PinException;
 import de.neemann.digital.lang.Lang;
 import io.zenoh.Session;
 import io.zenoh.exceptions.KeyExprException;
 import io.zenoh.exceptions.ZenohException;
 import io.zenoh.keyexpr.KeyExpr;
-import io.zenoh.prelude.Encoding;
 import io.zenoh.query.Reply;
 import io.zenoh.query.Reply.Success;
 import io.zenoh.sample.Sample;
 import io.zenoh.subscriber.Subscriber;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Optional;
-
-import static de.neemann.digital.core.element.PinInfo.input;
-import static de.neemann.digital.core.element.PinInfo.output;
 
 /**
  * The ZenohSubscriber node
@@ -121,8 +115,11 @@ public class ZenohSubscriber extends Node implements Element {
                 this.onSample(sample);
             }
         } catch (ZenohException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            if (e instanceof KeyExprException) {
+                throw new NodeException("Invalid Zenoh key expression: \"" + this.zenohKeyExprStr + "\"", this, -1, new ImmutableList<>());
+            } else {
+                throw new NodeException(e.getMessage(), this, -1, new ImmutableList<>());
+            }
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

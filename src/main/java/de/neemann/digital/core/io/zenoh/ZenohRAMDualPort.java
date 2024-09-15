@@ -8,11 +8,13 @@ package de.neemann.digital.core.io.zenoh;
 
 import de.neemann.digital.core.element.ElementAttributes;
 import de.neemann.digital.core.element.ElementTypeDescription;
+import de.neemann.digital.core.element.ImmutableList;
 import de.neemann.digital.core.element.Keys;
 import de.neemann.digital.core.io.zenoh.ram_messages.GetQueryMessage;
 import de.neemann.digital.core.io.zenoh.ram_messages.MemoryRangeMessage;
 import de.neemann.digital.core.memory.RAMDualPort;
 import io.zenoh.Session;
+import io.zenoh.exceptions.KeyExprException;
 import io.zenoh.exceptions.ZenohException;
 import io.zenoh.keyexpr.KeyExpr;
 import io.zenoh.prelude.Encoding;
@@ -147,8 +149,23 @@ public class ZenohRAMDualPort extends RAMDualPort {
                     e.printStackTrace();
                 }
             }).res();
+
+            // send initial info
+            try {
+                ByteBuffer buffer = ByteBuffer.allocate(8);
+                buffer.putInt(this.size);
+                buffer.putInt(this.bits);
+                session.put(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/info"), new io.zenoh.value.Value(buffer.array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null))).res();
+            } catch (ZenohException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         } catch (ZenohException e) {
-            e.printStackTrace();
+            if (e instanceof KeyExprException) {
+                throw new NodeException("Invalid Zenoh key expression: \"" + this.baseZenohKeyExprStr + "\"", this, -1, new ImmutableList<>());
+            } else {
+                throw new NodeException(e.getMessage(), this, -1, new ImmutableList<>());
+            }
         }
     }
 

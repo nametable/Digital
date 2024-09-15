@@ -9,9 +9,11 @@ import de.neemann.digital.core.*;
 import de.neemann.digital.core.element.Element;
 import de.neemann.digital.core.element.ElementAttributes;
 import de.neemann.digital.core.element.ElementTypeDescription;
+import de.neemann.digital.core.element.ImmutableList;
 import de.neemann.digital.core.element.Keys;
 import de.neemann.digital.draw.elements.PinException;
 import io.zenoh.Session;
+import io.zenoh.exceptions.KeyExprException;
 import io.zenoh.exceptions.ZenohException;
 import io.zenoh.keyexpr.KeyExpr;
 import io.zenoh.prelude.Encoding;
@@ -114,8 +116,11 @@ public class ZenohPublisher extends Node implements Element, ZenohDataSender {
                 }).res();
             }
         } catch (ZenohException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            if (e instanceof KeyExprException) {
+                throw new NodeException("Invalid Zenoh key expression: \"" + this.zenohKeyExprStr + "\"", this, -1, new ImmutableList<>());
+            } else {
+                throw new NodeException(e.getMessage(), this, -1, new ImmutableList<>());
+            }
         }
     }
 

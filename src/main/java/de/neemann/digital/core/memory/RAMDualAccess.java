@@ -42,6 +42,7 @@ public class RAMDualAccess extends Node implements Element, RAMInterface {
     private final int addrBits;
     protected final int bits;
     private final String label;
+    /** number of addressable words */
     protected final int size;
     private final boolean isProgramMemory;
     protected ObservableValue addr1In;

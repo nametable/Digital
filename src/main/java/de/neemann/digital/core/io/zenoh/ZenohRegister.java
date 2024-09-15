@@ -6,10 +6,12 @@ import de.neemann.digital.core.Model;
 import de.neemann.digital.core.NodeException;
 import de.neemann.digital.core.element.ElementAttributes;
 import de.neemann.digital.core.element.ElementTypeDescription;
+import de.neemann.digital.core.element.ImmutableList;
 import de.neemann.digital.core.element.Keys;
 
 import de.neemann.digital.core.memory.Register;
 import io.zenoh.Session;
+import io.zenoh.exceptions.KeyExprException;
 import io.zenoh.exceptions.ZenohException;
 import io.zenoh.keyexpr.KeyExpr;
 import io.zenoh.prelude.Encoding;
@@ -47,7 +49,6 @@ public class ZenohRegister extends Register implements ZenohDataSender {
     private Publisher changePublisher;
     private Subscriber setSubscriber;
     private Queryable getQueryable;
-    private Queryable infoQueryable;
 
     private long lastDataSent;
 
@@ -70,8 +71,9 @@ public class ZenohRegister extends Register implements ZenohDataSender {
     public void init(Model model) throws NodeException {
         Session session = SessionHolder.INSTANCE.getSession();
         try {
-            if (enablePublishing)
+            if (enablePublishing) {
                 changePublisher = session.declarePublisher(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/changes")).res();
+            }
             setSubscriber = session.declareSubscriber(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/set")).with(sample -> {
                 ByteBuffer buffer = ByteBuffer.wrap(sample.getValue().getPayload());
                 this.value = buffer.getLong();
@@ -79,7 +81,7 @@ public class ZenohRegister extends Register implements ZenohDataSender {
                 sendData();
             }).res();
 
-            getQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/get")).with(query -> {
+            getQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExprStr)).with(query -> {
                 try {
                     ByteBuffer buffer = ByteBuffer.allocate(8);
                     buffer.putLong(this.value);
@@ -91,26 +93,12 @@ public class ZenohRegister extends Register implements ZenohDataSender {
                     e.printStackTrace();
                 }
             }).res();
-
-            infoQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/info")).with(query -> {
-                System.out.println("Received query: " + query);
-                try {
-                    byte[] labelBytes = this.label.getBytes();
-                    ByteBuffer buffer = ByteBuffer.allocate(8 + labelBytes.length);
-                    buffer.putInt(this.bits);
-                    buffer.putInt(labelBytes.length);
-                    buffer.put(labelBytes);
-                    query.reply(query.getKeyExpr())
-                            .success(new io.zenoh.value.Value(buffer.array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null)))
-                            .res();
-                } catch (ZenohException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }).res();
         } catch (ZenohException e) {
-            e.printStackTrace();
-            // throw new NodeException(e);
+            if (e instanceof KeyExprException) {
+                throw new NodeException("Invalid Zenoh key expression: \"" + this.baseZenohKeyExprStr + "\"", this, -1, new ImmutableList<>());
+            } else {
+                throw new NodeException(e.getMessage(), this, -1, new ImmutableList<>());
+            }
         }
     }
 
@@ -119,7 +107,6 @@ public class ZenohRegister extends Register implements ZenohDataSender {
         changePublisher.close();
         setSubscriber.close();
         getQueryable.close();
-        infoQueryable.close();
     }
 
     @Override
