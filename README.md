@@ -270,3 +270,6 @@ Many thanks to the following persons for their help:
 ```bash
 mvn -Dmaven.test.skip=true -Dcheckstyle.skip=true package
 ```
+
+## Zenoh Additions
+See the [Zenoh README](ZENOH.md) for more information on the Zenoh additions to Digital.
