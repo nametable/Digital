@@ -7,12 +7,12 @@
       <elementName>ZenohPublisher</elementName>
       <elementAttributes>
         <entry>
-          <string>Bits</string>
-          <int>8</int>
-        </entry>
-        <entry>
           <string>zenohKeyExpr</string>
           <string>test/pub1</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>8</int>
         </entry>
       </elementAttributes>
       <pos x="820" y="320"/>
@@ -21,12 +21,12 @@
       <elementName>ZenohSubscriber</elementName>
       <elementAttributes>
         <entry>
-          <string>Bits</string>
-          <int>8</int>
-        </entry>
-        <entry>
           <string>zenohKeyExpr</string>
           <string>test/sub1</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>8</int>
         </entry>
       </elementAttributes>
       <pos x="600" y="320"/>
@@ -93,6 +93,16 @@
       </elementAttributes>
       <pos x="720" y="460"/>
     </visualElement>
+    <visualElement>
+      <elementName>Clock</elementName>
+      <elementAttributes>
+        <entry>
+          <string>runRealTime</string>
+          <boolean>true</boolean>
+        </entry>
+      </elementAttributes>
+      <pos x="660" y="500"/>
+    </visualElement>
   </visualElements>
   <wires>
     <wire>
@@ -106,6 +116,10 @@
     <wire>
       <p1 x="800" y="420"/>
       <p2 x="820" y="420"/>
+    </wire>
+    <wire>
+      <p1 x="660" y="500"/>
+      <p2 x="700" y="500"/>
     </wire>
     <wire>
       <p1 x="700" y="440"/>

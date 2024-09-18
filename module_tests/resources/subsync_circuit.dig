@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<circuit>
+  <version>2</version>
+  <attributes/>
+  <visualElements>
+    <visualElement>
+      <elementName>ZenohSyncSubscriber</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>16</int>
+        </entry>
+        <entry>
+          <string>zenohKeyExpr</string>
+          <string>test/sub_sync</string>
+        </entry>
+      </elementAttributes>
+      <pos x="820" y="460"/>
+    </visualElement>
+    <visualElement>
+      <elementName>Clock</elementName>
+      <elementAttributes>
+        <entry>
+          <string>runRealTime</string>
+          <boolean>true</boolean>
+        </entry>
+      </elementAttributes>
+      <pos x="840" y="400"/>
+    </visualElement>
+    <visualElement>
+      <elementName>ZenohSubscriber</elementName>
+      <elementAttributes>
+        <entry>
+          <string>zenohKeyExpr</string>
+          <string>test/clock</string>
+        </entry>
+      </elementAttributes>
+      <pos x="720" y="460"/>
+    </visualElement>
+    <visualElement>
+      <elementName>ZenohPublisher</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>16</int>
+        </entry>
+        <entry>
+          <string>zenohKeyExpr</string>
+          <string>test/output</string>
+        </entry>
+      </elementAttributes>
+      <pos x="920" y="460"/>
+    </visualElement>
+    <visualElement>
+      <elementName>PullDown</elementName>
+      <elementAttributes>
+        <entry>
+          <string>Bits</string>
+          <int>16</int>
+        </entry>
+      </elementAttributes>
+      <pos x="900" y="500"/>
+    </visualElement>
+  </visualElements>
+  <wires>
+    <wire>
+      <p1 x="840" y="400"/>
+      <p2 x="900" y="400"/>
+    </wire>
+    <wire>
+      <p1 x="780" y="460"/>
+      <p2 x="820" y="460"/>
+    </wire>
+    <wire>
+      <p1 x="880" y="460"/>
+      <p2 x="900" y="460"/>
+    </wire>
+    <wire>
+      <p1 x="900" y="460"/>
+      <p2 x="920" y="460"/>
+    </wire>
+    <wire>
+      <p1 x="900" y="460"/>
+      <p2 x="900" y="500"/>
+    </wire>
+  </wires>
+  <measurementOrdering/>
+</circuit>
