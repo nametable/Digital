@@ -365,9 +365,10 @@
         </dependency>
 
         <dependency>
-            <groupId>io.zenoh</groupId>
-            <artifactId>zenoh-java-jvm</artifactId>
-            <version>1.0.0-alpha.6</version>
+            <groupId>org.eclipse.zenoh</groupId>
+            <artifactId>zenoh-java</artifactId>
+            <version>1.7.1</version>
+            <!-- <version>1.0.0-alpha.6</version> -->
             <!-- <version>0.11.0-rc.3</version> -->
         </dependency>
     </dependencies>

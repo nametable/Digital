@@ -14,12 +14,11 @@ import de.neemann.digital.core.io.telnet.ServerHolder;
 import de.neemann.digital.draw.elements.PinException;
 import de.neemann.digital.lang.Lang;
 import io.zenoh.Session;
-import io.zenoh.exceptions.KeyExprException;
-import io.zenoh.exceptions.ZenohException;
+import io.zenoh.bytes.Encoding;
+import io.zenoh.exceptions.ZError;
 import io.zenoh.keyexpr.KeyExpr;
-import io.zenoh.prelude.Encoding;
+import io.zenoh.pubsub.Subscriber;
 import io.zenoh.sample.Sample;
-import io.zenoh.subscriber.Subscriber;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -99,7 +98,7 @@ public class ZenohSyncSubscriber extends Node implements Element {
     }
 
     public void onSample(Sample sample) {
-        byte[] payload = sample.getValue().getPayload();
+        byte[] payload = sample.getPayload().toBytes();
 
         ByteBuffer buffer = ByteBuffer.wrap(payload);
 
@@ -127,12 +126,8 @@ public class ZenohSyncSubscriber extends Node implements Element {
 
         try {
             zenohKeyExpr = KeyExpr.tryFrom(this.zenohKeyExprStr);
-            subscriber = session.declareSubscriber(this.zenohKeyExpr)
-                    .with(sample -> this.onSample(sample)).res();
-            subscriber.getReceiver();
-
-            session.get(this.zenohKeyExpr).res();
-        } catch (ZenohException e) {
+            subscriber = session.declareSubscriber(this.zenohKeyExpr, sample -> this.onSample(sample));
+        } catch (ZError e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

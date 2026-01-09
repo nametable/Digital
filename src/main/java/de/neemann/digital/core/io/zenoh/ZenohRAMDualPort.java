@@ -14,15 +14,15 @@ import de.neemann.digital.core.io.zenoh.ram_messages.GetQueryMessage;
 import de.neemann.digital.core.io.zenoh.ram_messages.MemoryRangeMessage;
 import de.neemann.digital.core.memory.RAMDualPort;
 import io.zenoh.Session;
-import io.zenoh.exceptions.KeyExprException;
-import io.zenoh.exceptions.ZenohException;
+import io.zenoh.bytes.Encoding;
+import io.zenoh.bytes.ZBytes;
+import io.zenoh.exceptions.ZError;
 import io.zenoh.keyexpr.KeyExpr;
-import io.zenoh.prelude.Encoding;
-import io.zenoh.publication.Publisher;
-import io.zenoh.queryable.Query;
-import io.zenoh.queryable.Queryable;
+import io.zenoh.pubsub.Publisher;
+import io.zenoh.pubsub.Subscriber;
+import io.zenoh.query.Query;
+import io.zenoh.query.Queryable;
 import io.zenoh.sample.Sample;
-import io.zenoh.subscriber.Subscriber;
 
 import static de.neemann.digital.core.element.PinInfo.input;
 
@@ -63,7 +63,7 @@ public class ZenohRAMDualPort extends RAMDualPort {
     }
 
     public void onSetMemoryMessage(Sample sample) {
-        byte[] payload = sample.getValue().getPayload();
+        byte[] payload = sample.getPayload().toBytes();
         ByteBuffer buffer = ByteBuffer.wrap(payload);
         MemoryRangeMessage message = MemoryRangeMessage.fromByteBuffer(buffer, bytesPerWord);
         System.out.println("/set called with address: " + message.address + " and length: " + message.data.length);
@@ -76,14 +76,18 @@ public class ZenohRAMDualPort extends RAMDualPort {
             model.modify(() -> output.setValue(this.memory.getDataWord((int)addrIn.getValue())));
         }
 
-        changePublisher.put(sample.getValue()).res();
+        try {
+            changePublisher.put(sample.getPayload());
+        } catch (ZError e) {
+            e.printStackTrace();
+        }
 
     }
 
     public void onGetQuery(Query query) {
         // - 4 bytes of address
         // - 4 bytes of length
-        byte[] payload = query.getValue().getPayload();
+        byte[] payload = query.getPayload().toBytes();
         ByteBuffer buffer = ByteBuffer.wrap(payload);
         GetQueryMessage getMessage = GetQueryMessage.fromByteBuffer(buffer);
         System.out.println("/get called with address: " + getMessage.address + " and length: " + getMessage.length);
@@ -95,8 +99,8 @@ public class ZenohRAMDualPort extends RAMDualPort {
         }
 
         try {
-            query.reply(query.getKeyExpr()).success(new io.zenoh.value.Value(replyMessage.toByteBuffer().array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null))).res();
-        } catch (ZenohException e) {
+            query.reply(query.getKeyExpr(), ZBytes.from(replyMessage.toByteBuffer().array()));
+        } catch (ZError e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -123,7 +127,11 @@ public class ZenohRAMDualPort extends RAMDualPort {
         MemoryRangeMessage message = new MemoryRangeMessage(bytesPerWord, addr, new long[] { data });
 
         System.out.println("writeToMemory called!");
-        changePublisher.put(new io.zenoh.value.Value(message.toByteBuffer().array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null))).res();
+        try {
+            changePublisher.put(ZBytes.from(message.toByteBuffer().array()));
+        } catch (ZError e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -132,40 +140,35 @@ public class ZenohRAMDualPort extends RAMDualPort {
         this.model = model;
         Session session = SessionHolder.INSTANCE.getSession();
         try {
-            changePublisher = session.declarePublisher(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/changes")).res();
-            setSubscriber = session.declareSubscriber(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/set"))
-                    .with(sample -> this.onSetMemoryMessage(sample)).res();
-            getQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/get")).with(query -> onGetQuery(query)).res();
+            changePublisher = session.declarePublisher(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/changes"));
+            setSubscriber = session.declareSubscriber(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/set"), sample -> this.onSetMemoryMessage(sample));
+            getQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/get"), query -> onGetQuery(query));
             
-            infoQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/info")).with(query -> {
+            infoQueryable = session.declareQueryable(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/info"), query -> {
                 System.out.println("Received query: " + query);
                 try {
                     ByteBuffer buffer = ByteBuffer.allocate(8);
                     buffer.putInt(this.size);
                     buffer.putInt(this.bits);
-                    query.reply(query.getKeyExpr()).success(new io.zenoh.value.Value(buffer.array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null))).res();
-                } catch (ZenohException e) {
+                    query.reply(query.getKeyExpr(), ZBytes.from(buffer.array()));
+                } catch (ZError e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-            }).res();
+            });
 
             // send initial info
             try {
                 ByteBuffer buffer = ByteBuffer.allocate(8);
                 buffer.putInt(this.size);
                 buffer.putInt(this.bits);
-                session.put(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/info"), new io.zenoh.value.Value(buffer.array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null))).res();
-            } catch (ZenohException e) {
+                session.put(KeyExpr.tryFrom(this.baseZenohKeyExprStr + "/info"), ZBytes.from(buffer.array()));
+            } catch (ZError e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        } catch (ZenohException e) {
-            if (e instanceof KeyExprException) {
-                throw new NodeException("Invalid Zenoh key expression: \"" + this.baseZenohKeyExprStr + "\"", this, -1, new ImmutableList<>());
-            } else {
-                throw new NodeException(e.getMessage(), this, -1, new ImmutableList<>());
-            }
+        } catch (ZError e) {
+            throw new NodeException("Invalid Zenoh key expression: \"" + this.baseZenohKeyExprStr + "\"", this, -1, new ImmutableList<>());
         }
     }
 
