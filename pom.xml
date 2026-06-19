@@ -18,13 +18,6 @@
         <version.org.slf4j>1.7.24</version.org.slf4j>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>github</id>
-            <url>https://maven.pkg.github.com/eclipse-zenoh/zenoh-java</url>
-        </repository>
-    </repositories>
-
     <distributionManagement>
         <site>
             <id></id>
@@ -365,10 +358,9 @@
         </dependency>
 
         <dependency>
-            <groupId>io.zenoh</groupId>
-            <artifactId>zenoh-java-jvm</artifactId>
-            <version>1.0.0-alpha.6</version>
-            <!-- <version>0.11.0-rc.3</version> -->
+            <groupId>org.eclipse.zenoh</groupId>
+            <artifactId>zenoh-java</artifactId>
+            <version>1.9.0</version>
         </dependency>
     </dependencies>
 

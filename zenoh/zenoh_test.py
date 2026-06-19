@@ -1,11 +1,16 @@
-from zenoh.session import Session, Subscriber, Publisher, Sample, Encoding
 import zenoh
+from zenoh import Session, Subscriber, Publisher, Sample, Encoding
 import struct
 import time
 
+def peer_config():
+    config = zenoh.Config()
+    config.insert_json5("mode", '"peer"')
+    return config
+
 def listener(sample: Sample):
     print("Encoding", sample.encoding)
-    if sample.encoding == Encoding.TEXT_PLAIN():
+    if sample.encoding == Encoding.TEXT_PLAIN:
         pass
     else:
         print(f"Received {sample.kind} ('{sample.key_expr}': '{sample.payload}')")
@@ -14,7 +19,7 @@ def listener(sample: Sample):
         # print(f"{sample.key_expr}: {value}")
         # print(f"timestamp: {time.time()}")
 
-session: Session = zenoh.open()
+session: Session = zenoh.open(peer_config())
 # subscriber: Subscriber = session.declare_subscriber('zenoh_test/clock/**', listener)
 # publisher: Publisher = session.declare_publisher('zenoh_test/clock/speed')
 subscriber: Subscriber = session.declare_subscriber('**', listener)
@@ -24,5 +29,5 @@ while True:
     new_speed = input("Enter new speed: ")
     buf = struct.pack('>Q', int(new_speed))
     print(f"timestamp: {time.time()}")
-    publisher.put(buf, Encoding.APP_INTEGER())
+    publisher.put(buf, encoding=Encoding.APPLICATION_OCTET_STREAM)
     # publisher.put(new_speed.encode('utf-8'), Encoding.TEXT_PLAIN())

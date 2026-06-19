@@ -60,9 +60,9 @@ import de.neemann.digital.toolchain.Configuration;
 import de.neemann.digital.undo.ChangedListener;
 import de.neemann.digital.undo.Modifications;
 import de.neemann.gui.*;
+import io.zenoh.Config;
 import io.zenoh.Session;
-import io.zenoh.exceptions.KeyExprException;
-import io.zenoh.exceptions.SessionException;
+import io.zenoh.Zenoh;
 import io.zenoh.keyexpr.KeyExpr;
 
 import org.json.JSONObject;
@@ -756,8 +756,9 @@ public final class Main extends JFrame implements ClosingWindowListener.ConfirmS
                                 System.out.println("Exporting to JSON: " + file.getAbsolutePath());
 
                                 JSONObject json = new JSONObject();
-                                Session session = Session.open();
-                                session.put(KeyExpr.tryFrom("host/digital/hey"), "Yo, I sent this from Java!").res();
+                                try (Session session = Zenoh.open(Config.loadDefault())) {
+                                    session.put(KeyExpr.tryFrom("host/digital/hey"), "Yo, I sent this from Java!");
+                                }
                                 Circuit circuit = circuitComponent.getCircuit();
                                 circuit.getElements().forEach(element -> {
                                     JSONObject elementJSON = new JSONObject();

@@ -1,8 +1,13 @@
-from zenoh.session import Session, Subscriber, Publisher, Sample, Encoding, Reply
 import zenoh
+from zenoh import Session, Subscriber, Publisher, Sample, Encoding, Reply
 import struct
 import time
 import sys
+
+def peer_config():
+    config = zenoh.Config()
+    config.insert_json5("mode", '"peer"')
+    return config
 
 
 base_ram_key = "ram"
@@ -15,7 +20,7 @@ def change_listener(sample: Sample):
     # if counter % 10000 == 0:
     print(f"Received {sample.kind} ('{sample.key_expr}': '{sample.payload}')")
 
-session: Session = zenoh.open()
+session: Session = zenoh.open(peer_config())
 # session.declare_subscriber(f'{base_ram_key}/changes', change_listener)
 subscriber: Subscriber = session.declare_subscriber(f'{base_ram_key}/**', change_listener)
 
@@ -30,17 +35,19 @@ def get_response(reply: Reply):
     # if reply.is_ok:
     sample: Sample = reply.ok
     print(f"Received reply from get: {sample.kind} ('{sample.key_expr}': '{sample.payload}')")
-    address = struct.unpack('>i', sample.payload[:4])[0]
-    length = struct.unpack('>i', sample.payload[4:8])[0]
-    data = sample.payload[8:]
+    payload = bytes(sample.payload)
+    address = struct.unpack('>i', payload[:4])[0]
+    length = struct.unpack('>i', payload[4:8])[0]
+    data = payload[8:]
     print(f"address: {address}, length: {length}, data: {data}")
 
 def info_response(reply: Reply):
     # if reply.is_ok:
     sample: Sample = reply.ok
     print(f"Received reply from info: {sample.kind} ('{sample.key_expr}': '{sample.payload}')")
-    size = struct.unpack('>i', sample.payload[:4])[0]
-    data_width = struct.unpack('>i', sample.payload[4:])[0]
+    payload = bytes(sample.payload)
+    size = struct.unpack('>i', payload[:4])[0]
+    data_width = struct.unpack('>i', payload[4:])[0]
     print(f"size: {size}, data_width: {data_width}")
 
 clock = False
@@ -55,7 +62,7 @@ while True:
 
         # https://docs.python.org/3/library/struct.html
         buf = struct.pack('>i', int(addr)) + struct.pack('>i', int(length))
-        session.get(f'{base_ram_key}/get', get_response, value=buf)
+        session.get(f'{base_ram_key}/get', get_response, payload=buf)
 
     elif command_args[0] == "info":
         session.get(f'{base_ram_key}/info', info_response)

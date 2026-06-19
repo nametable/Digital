@@ -13,12 +13,10 @@ import de.neemann.digital.core.element.ImmutableList;
 import de.neemann.digital.core.element.Keys;
 import de.neemann.digital.draw.elements.PinException;
 import io.zenoh.Session;
-import io.zenoh.exceptions.KeyExprException;
-import io.zenoh.exceptions.ZenohException;
+import io.zenoh.exceptions.ZError;
 import io.zenoh.keyexpr.KeyExpr;
-import io.zenoh.prelude.Encoding;
-import io.zenoh.publication.Publisher;
-import io.zenoh.queryable.Queryable;
+import io.zenoh.pubsub.Publisher;
+import io.zenoh.query.Queryable;
 
 import java.nio.ByteBuffer;
 
@@ -97,30 +95,26 @@ public class ZenohPublisher extends Node implements Element, ZenohDataSender {
         try {
             this.zenohKeyExpr = KeyExpr.tryFrom(this.zenohKeyExprStr);
             if (enablePublishing) {
-                publisher = session.declarePublisher(this.zenohKeyExpr).res();
+                publisher = session.declarePublisher(this.zenohKeyExpr);
                 // publish initial value usually 0
                 sendData();
             }
             if (enableQuerying) {
-                queryable = session.declareQueryable(this.zenohKeyExpr).with((query) -> {
+                queryable = session.declareQueryable(this.zenohKeyExpr, query -> {
                     System.out.println("Received query: " + query);
                     try {
                         long value = dataIn.getValue();
                         ByteBuffer buffer = ByteBuffer.allocate(8);
                         buffer.putLong(value);
-                        query.reply(this.zenohKeyExpr).success(new io.zenoh.value.Value(buffer.array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null))).res();
-                    } catch (ZenohException e) {
+                        query.reply(this.zenohKeyExpr, ZenohPayload.bytes(buffer.array()), ZenohPayload.replyOptions());
+                    } catch (ZError e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
-                }).res();
+                });
             }
-        } catch (ZenohException e) {
-            if (e instanceof KeyExprException) {
-                throw new NodeException("Invalid Zenoh key expression: \"" + this.zenohKeyExprStr + "\"", this, -1, new ImmutableList<>());
-            } else {
-                throw new NodeException(e.getMessage(), this, -1, new ImmutableList<>());
-            }
+        } catch (ZError e) {
+            throw new NodeException(e.getMessage(), this, -1, new ImmutableList<>());
         }
     }
 
@@ -158,8 +152,12 @@ public class ZenohPublisher extends Node implements Element, ZenohDataSender {
         long value = dataIn.getValue();
         ByteBuffer buffer = ByteBuffer.allocate(8);
         buffer.putLong(value);
-        publisher.put(new io.zenoh.value.Value(buffer.array(), new Encoding(Encoding.ID.APPLICATION_OCTET_STREAM, null))).res();
-        lastDataSent = value;
+        try {
+            publisher.put(ZenohPayload.bytes(buffer.array()), ZenohPayload.putOptions());
+            lastDataSent = value;
+        } catch (ZError e) {
+            e.printStackTrace();
+        }
     }
 
 }

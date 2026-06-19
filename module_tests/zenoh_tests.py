@@ -3,6 +3,14 @@ import zenoh
 import struct
 import time
 
+def peer_config():
+    config = zenoh.Config()
+    config.insert_json5("mode", '"peer"')
+    return config
+
+def payload_bytes(sample):
+    return bytes(sample.payload)
+
 # runs Digital.jar with the given circuit file (.dig)
 def start_digital_with_circuit(circuit_path: str):
     import subprocess
@@ -10,7 +18,7 @@ def start_digital_with_circuit(circuit_path: str):
 
 class TestZenohPublisher(unittest.TestCase):
     def setUp(self):
-        self.session = zenoh.open(zenoh.Config.peer())
+        self.session = zenoh.open(peer_config())
         self.process = start_digital_with_circuit("./resources/pub_circuit.dig")
 
     def test_receive(self):
@@ -18,12 +26,12 @@ class TestZenohPublisher(unittest.TestCase):
         sample = sub.recv()
 
         # value of 1 packed into 8 bytes
-        self.assertEqual(sample.payload.deserialize(bytes), struct.pack(">Q", 1))
+        self.assertEqual(payload_bytes(sample), struct.pack(">Q", 1))
 
         sample = sub.recv()
 
         # value of 0 packed into 8 bytes
-        self.assertEqual(sample.payload.deserialize(bytes), struct.pack(">Q", 0))
+        self.assertEqual(payload_bytes(sample), struct.pack(">Q", 0))
 
     def tearDown(self):
         self.session.close()
@@ -32,7 +40,7 @@ class TestZenohPublisher(unittest.TestCase):
 
 class TestZenohSubscriber(unittest.TestCase):
     def setUp(self):
-        self.session = zenoh.open(zenoh.Config.peer())
+        self.session = zenoh.open(peer_config())
         self.process = start_digital_with_circuit("./resources/sub_circuit.dig")
 
     def test_publish(self):
@@ -48,12 +56,12 @@ class TestZenohSubscriber(unittest.TestCase):
         pub1.put(struct.pack(">Q", 5))
 
         sample = sub1.recv()
-        self.assertEqual(sample.payload.deserialize(bytes), struct.pack(">Q", 5))
+        self.assertEqual(payload_bytes(sample), struct.pack(">Q", 5))
 
         pub2.put(struct.pack(">Q", 5))
 
         sample = sub2.recv()
-        self.assertEqual(sample.payload.deserialize(bytes), struct.pack(">Q", 10))
+        self.assertEqual(payload_bytes(sample), struct.pack(">Q", 10))
 
     def tearDown(self):
         self.session.close()
@@ -62,7 +70,7 @@ class TestZenohSubscriber(unittest.TestCase):
 
 class TestZenohSubscriberSynchronous(unittest.TestCase):
     def setUp(self):
-        self.session = zenoh.open(zenoh.Config.peer())
+        self.session = zenoh.open(peer_config())
         self.process = start_digital_with_circuit("./resources/subsync_circuit.dig")
 
     def test_subscribe_sync(self):
@@ -84,7 +92,7 @@ class TestZenohSubscriberSynchronous(unittest.TestCase):
             clock.put(struct.pack(">Q", 0))
 
             sample = out_sub.recv()
-            self.assertEqual(sample.payload.deserialize(bytes), struct.pack(">Q", value))
+            self.assertEqual(payload_bytes(sample), struct.pack(">Q", value))
 
             clock.put(struct.pack(">Q", 1))
             time.sleep(0.1)
@@ -96,7 +104,7 @@ class TestZenohSubscriberSynchronous(unittest.TestCase):
 
 class TestZenohRegister(unittest.TestCase):
     def setUp(self):
-        self.session = zenoh.open(zenoh.Config.peer())
+        self.session = zenoh.open(peer_config())
         self.process = start_digital_with_circuit("./resources/reg_circuit.dig")
 
     def test_register(self):
@@ -110,18 +118,18 @@ class TestZenohRegister(unittest.TestCase):
         set_reg.put(struct.pack(">Q", 0))
         enable.put(struct.pack(">Q", 1))
         for i in range(10):
-            val = struct.unpack(">Q", changes.recv().payload.deserialize(bytes))[0]
+            val = struct.unpack(">Q", payload_bytes(changes.recv()))[0]
             self.assertEqual(val, (i + 1) * 2)
 
         enable.put(struct.pack(">Q", 0))
         set_reg.put(struct.pack(">Q", 1))
-        val = struct.unpack(">Q", changes.recv().payload.deserialize(bytes))[0]
+        val = struct.unpack(">Q", payload_bytes(changes.recv()))[0]
         self.assertEqual(val, 1)
         changes.try_recv()
 
         enable.put(struct.pack(">Q", 1))
         for i in range(10):
-            val = struct.unpack(">Q", changes.recv().payload.deserialize(bytes))[0]
+            val = struct.unpack(">Q", payload_bytes(changes.recv()))[0]
             self.assertEqual(val, (i + 1) * 2 + 1)
 
         enable.put(struct.pack(">Q", 0))
@@ -174,7 +182,7 @@ class RamRange:
 
 class TestRAMDualAccess(unittest.TestCase):
     def setUp(self):
-        self.session = zenoh.open(zenoh.Config.peer())
+        self.session = zenoh.open(peer_config())
         self.process = start_digital_with_circuit("./resources/ram_circuit.dig")
 
     def test_ram(self):
@@ -197,7 +205,7 @@ class TestRAMDualAccess(unittest.TestCase):
         time.sleep(3)
         
         # check that info is correct (8 bit addr, 32 bit data)
-        info = ram_info.recv().payload.deserialize(bytes)
+        info = payload_bytes(ram_info.recv())
         # size is a 4 bytes integer
         size = struct.unpack(">I", info[0:4])[0]
         # bits is a 4 byte integer
@@ -223,12 +231,12 @@ class TestRAMDualAccess(unittest.TestCase):
         load.put(struct.pack(">Q", 1))
 
         # check changes
-        changes: RamRange = RamRange.from_bytes(ram_changes.recv().payload.deserialize(bytes), bytes_per_word_num)
+        changes: RamRange = RamRange.from_bytes(payload_bytes(ram_changes.recv()), bytes_per_word_num)
         self.assertEqual(changes.address, 0x10)
         self.assertEqual(changes.length, 1)
         self.assertEqual(changes.data, [0x12345678])
 
-        data = out_data1.recv().payload.deserialize(bytes)
+        data = payload_bytes(out_data1.recv())
         self.assertEqual(data, struct.pack(">Q", 0x12345678))
 
         # write 0x87654321 to address 0x20
@@ -241,11 +249,11 @@ class TestRAMDualAccess(unittest.TestCase):
 
         # read from address 0x20
         in_addr2.put(struct.pack(">Q", 0x20))
-        data = out_data2.recv().payload.deserialize(bytes)
+        data = payload_bytes(out_data2.recv())
         self.assertEqual(data, struct.pack(">Q", 0x87654321))
 
         # check changes
-        changes = RamRange.from_bytes(ram_changes.recv().payload.deserialize(bytes), bytes_per_word_num)
+        changes = RamRange.from_bytes(payload_bytes(ram_changes.recv()), bytes_per_word_num)
         self.assertEqual(changes.address, 0x20)
         self.assertEqual(changes.length, 1)
         self.assertEqual(changes.data, [0x87654321])
@@ -261,14 +269,14 @@ class TestRAMDualAccess(unittest.TestCase):
         ram_set.put(buffer)
 
         # read changes
-        changes = ram_changes.recv().payload.deserialize(bytes)
+        changes = payload_bytes(ram_changes.recv())
         self.assertEqual(changes, buffer)
 
         # read 4 words from address 0x10
         request_payload = bytes()
         request_payload += struct.pack(">I", 0x10)
         request_payload += struct.pack(">I", 4)
-        some_words = RamRange.from_bytes(self.session.get("ram1/ram/get", payload=request_payload).recv().ok.payload.deserialize(bytes), bytes_per_word_num)
+        some_words = RamRange.from_bytes(payload_bytes(self.session.get("ram1/ram/get", payload=request_payload).recv().ok), bytes_per_word_num)
         self.assertEqual(some_words.address, 0x10)
         self.assertEqual(some_words.length, 4)
         self.assertEqual(some_words.data, [0x10, 0x11, 0x12, 0x13])
@@ -281,7 +289,7 @@ class TestRAMDualAccess(unittest.TestCase):
 
 class TestRAMSeparatedPorts(unittest.TestCase):
     def setUp(self):
-        self.session = zenoh.open(zenoh.Config.peer())
+        self.session = zenoh.open(peer_config())
         self.process = start_digital_with_circuit("./resources/ram_circuit.dig")
 
     def test_ram(self):
@@ -302,7 +310,7 @@ class TestRAMSeparatedPorts(unittest.TestCase):
         time.sleep(3)
         
         # check that info is correct (4 bit addr, 7 bit data)
-        info = ram_info.recv().payload.deserialize(bytes)
+        info = payload_bytes(ram_info.recv())
         # size is a 4 bytes integer
         size = struct.unpack(">I", info[0:4])[0]
         # bits is a 4 byte integer
@@ -326,11 +334,11 @@ class TestRAMSeparatedPorts(unittest.TestCase):
         # read from address 0x2
         load.put(struct.pack(">Q", 1))
 
-        data = out_data.recv().payload.deserialize(bytes)
+        data = payload_bytes(out_data.recv())
         self.assertEqual(data, struct.pack(">Q", 0x12))
 
         # check changes
-        changes: RamRange = RamRange.from_bytes(ram_changes.recv().payload.deserialize(bytes), bytes_per_word_num)
+        changes: RamRange = RamRange.from_bytes(payload_bytes(ram_changes.recv()), bytes_per_word_num)
         self.assertEqual(changes.address, 0x2)
         self.assertEqual(changes.length, 1)
         self.assertEqual(changes.data, [0x12])
@@ -346,14 +354,14 @@ class TestRAMSeparatedPorts(unittest.TestCase):
         ram_set.put(buffer)
 
         # read changes
-        changes = ram_changes.recv().payload.deserialize(bytes)
+        changes = payload_bytes(ram_changes.recv())
         self.assertEqual(changes, buffer)
 
         # read 5 words from address 0x7
         request_payload = bytes()
         request_payload += struct.pack(">I", 0x7)
         request_payload += struct.pack(">I", 5)
-        some_words = RamRange.from_bytes(self.session.get("ram2/ram/get", payload=request_payload).recv().ok.payload.deserialize(bytes), bytes_per_word_num)
+        some_words = RamRange.from_bytes(payload_bytes(self.session.get("ram2/ram/get", payload=request_payload).recv().ok), bytes_per_word_num)
         self.assertEqual(some_words.address, 0x7)
         self.assertEqual(some_words.length, 5)
         self.assertEqual(some_words.data, [0x7, 0x8, 0x9, 0xa, 0xb])

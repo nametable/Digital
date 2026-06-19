@@ -266,7 +266,7 @@ Many thanks to the following persons for their help:
 
 ![screnshot3](distribution/screenshot3.png)
 
-## Test build without running tests or checking style
+## Packaging Digital
 ```bash
 mvn -Dmaven.test.skip=true -Dcheckstyle.skip=true package
 ```

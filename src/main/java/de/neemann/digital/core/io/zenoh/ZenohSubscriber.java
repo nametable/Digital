@@ -13,13 +13,12 @@ import de.neemann.digital.core.element.ImmutableList;
 import de.neemann.digital.core.element.Keys;
 import de.neemann.digital.lang.Lang;
 import io.zenoh.Session;
-import io.zenoh.exceptions.KeyExprException;
-import io.zenoh.exceptions.ZenohException;
+import io.zenoh.exceptions.ZError;
 import io.zenoh.keyexpr.KeyExpr;
 import io.zenoh.query.Reply;
 import io.zenoh.query.Reply.Success;
 import io.zenoh.sample.Sample;
-import io.zenoh.subscriber.Subscriber;
+import io.zenoh.pubsub.Subscriber;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -76,7 +75,7 @@ public class ZenohSubscriber extends Node implements Element {
     }
 
     public void onSample(Sample sample) {
-        byte[] payload = sample.getValue().getPayload();
+        byte[] payload = sample.getPayload().toBytes();
         
         ByteBuffer buffer = ByteBuffer.wrap(payload);
         
@@ -101,11 +100,9 @@ public class ZenohSubscriber extends Node implements Element {
 
         try {
             this.zenohKeyExpr = KeyExpr.tryFrom(this.zenohKeyExprStr);
-            subscriber = session.declareSubscriber(this.zenohKeyExpr)
-                    .with(sample -> this.onSample(sample)).res();
-            subscriber.getReceiver();
+            subscriber = session.declareSubscriber(this.zenohKeyExpr, sample -> this.onSample(sample));
 
-            Optional<Reply> replyWrapper = session.get(this.zenohKeyExpr).res().take();
+            Optional<Reply> replyWrapper = session.get(this.zenohKeyExpr).take();
             if (replyWrapper.isEmpty()) {
                 return;
             }
@@ -114,12 +111,8 @@ public class ZenohSubscriber extends Node implements Element {
                 Sample sample = ((Success) reply).getSample();
                 this.onSample(sample);
             }
-        } catch (ZenohException e) {
-            if (e instanceof KeyExprException) {
-                throw new NodeException("Invalid Zenoh key expression: \"" + this.zenohKeyExprStr + "\"", this, -1, new ImmutableList<>());
-            } else {
-                throw new NodeException(e.getMessage(), this, -1, new ImmutableList<>());
-            }
+        } catch (ZError e) {
+            throw new NodeException(e.getMessage(), this, -1, new ImmutableList<>());
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
